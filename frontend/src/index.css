@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { --card: 1.5rem; }
+.container { max-width: 1200px; margin: 0 auto; }
+.card { border-radius: 1.25rem; box-shadow: 0 5px 20px rgba(2,6,23,0.06); }
+.btn { border-radius: 0.75rem; padding: 0.5rem 0.9rem; }

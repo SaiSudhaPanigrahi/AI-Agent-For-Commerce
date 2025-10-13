@@ -1,0 +1,142 @@
+[
+  {
+    "id": "p1",
+    "title": "AeroDry Run Tee",
+    "category": "t-shirts",
+    "description": "Lightweight moisture-wicking tee ideal for running and gym.",
+    "price": 24.99,
+    "image_url": "https://images.unsplash.com/photo-1516826957135-700dedea698c?q=80&w=800",
+    "brand": "Stratus",
+    "tags": [
+      "sports",
+      "running",
+      "breathable"
+    ]
+  },
+  {
+    "id": "p2",
+    "title": "TrailMax Sneakers",
+    "category": "shoes",
+    "description": "Rugged trail-running shoes with aggressive grip and toe protection.",
+    "price": 79.0,
+    "image_url": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=800",
+    "brand": "WildStep",
+    "tags": [
+      "outdoor",
+      "trail",
+      "grippy"
+    ]
+  },
+  {
+    "id": "p3",
+    "title": "FlexFit Training Shorts",
+    "category": "shorts",
+    "description": "4-way stretch training shorts with zip pocket for keys and cards.",
+    "price": 29.5,
+    "image_url": "https://images.unsplash.com/photo-1603252109334-43d2011b4dde?q=80&w=800",
+    "brand": "CoreWear",
+    "tags": [
+      "gym",
+      "stretch",
+      "zipper-pocket"
+    ]
+  },
+  {
+    "id": "p4",
+    "title": "Breeze Performance Tee",
+    "category": "t-shirts",
+    "description": "Ultra-breathable mesh tee for high-intensity workouts.",
+    "price": 27.99,
+    "image_url": "https://images.unsplash.com/photo-1592878904946-b3cd8ae0f9bf?q=80&w=800",
+    "brand": "Aero",
+    "tags": [
+      "mesh",
+      "HIIT",
+      "lightweight"
+    ]
+  },
+  {
+    "id": "p5",
+    "title": "CityStride Sneakers",
+    "category": "shoes",
+    "description": "Everyday lifestyle sneakers with cushioned midsole and clean design.",
+    "price": 69.0,
+    "image_url": "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800",
+    "brand": "UrbanWalk",
+    "tags": [
+      "lifestyle",
+      "casual",
+      "cushion"
+    ]
+  },
+  {
+    "id": "p6",
+    "title": "HeatGuard Hoodie",
+    "category": "hoodies",
+    "description": "Midweight hoodie with brushed fleece interior for warmth.",
+    "price": 49.0,
+    "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800",
+    "brand": "Northline",
+    "tags": [
+      "warm",
+      "fleece",
+      "winter"
+    ]
+  },
+  {
+    "id": "p7",
+    "title": "SwiftDry Tank",
+    "category": "tanks",
+    "description": "Sweat-wicking training tank with racerback fit.",
+    "price": 22.0,
+    "image_url": "https://images.unsplash.com/photo-1598978224661-5cf9ddb4ba44?q=80&w=800",
+    "brand": "Aero",
+    "tags": [
+      "tank",
+      "gym",
+      "sweat-wicking"
+    ]
+  },
+  {
+    "id": "p8",
+    "title": "Commuter Backpack 20L",
+    "category": "bags",
+    "description": "Water-resistant backpack with padded laptop sleeve.",
+    "price": 59.0,
+    "image_url": "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=800",
+    "brand": "Transit",
+    "tags": [
+      "bag",
+      "laptop",
+      "water-resistant"
+    ]
+  },
+  {
+    "id": "p9",
+    "title": "Studio Training Leggings",
+    "category": "leggings",
+    "description": "High-rise leggings with squat-proof fabric and phone pocket.",
+    "price": 39.0,
+    "image_url": "https://images.unsplash.com/photo-1549570652-97324981a6fd?q=80&w=800",
+    "brand": "FlowFit",
+    "tags": [
+      "leggings",
+      "studio",
+      "pocket"
+    ]
+  },
+  {
+    "id": "p10",
+    "title": "ThermaBottle 750ml",
+    "category": "bottles",
+    "description": "Double-wall insulated bottle keeps drinks cold for 24h.",
+    "price": 19.99,
+    "image_url": "https://images.unsplash.com/photo-1598986646512-3f2b36ebd9d8?q=80&w=800",
+    "brand": "HydroPeak",
+    "tags": [
+      "bottle",
+      "insulated",
+      "steel"
+    ]
+  }
+]
