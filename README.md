@@ -1,85 +1,94 @@
-# Mercury — AI Agent for a Commerce Website (Polished, No Docker)
-
-**One agent, three modes:** general chat · text recommendations · image-based product search.  
-Built for quick local dev and a clean presentation: **FastAPI backend** + **Vite React (TS)** + **Tailwind**. Optional OpenAI chat.
+# Mercury — AI Agent for a Commerce Website
+**One agent, three modes:** general chat · text recommendations · image-based product search  
+Stack: **FastAPI** (backend) + **Vite React (TypeScript)** + **Tailwind**. Optional OpenAI chat.
 
 ---
 
-## ✅ Requirements Coverage
+## Requirements Coverage
 
-- **User-friendly frontend interface** → Polished React UI with a hero, badges, chat, image search, recs, and full catalog.
-- **Documented agent API** → Swagger at **`http://localhost:8000/docs`** (FastAPI auto-docs) + `GET /health`.
-- **Single agent handles all** → One backend app exposes **chat**, **text-based recs**, and **image-based search** against the same catalog.
+- **User-friendly frontend interface** → Polished React UI (hero, badges, chat, image search, recommendations, catalog).
+- **Documented agent API** → FastAPI Swagger at **`http://localhost:8000/docs`** plus `GET /health`.
+- **Single agent handles all** → One backend app exposes **chat**, **text recs**, **image search** over one catalog.
 - **Catalog-limited** → Both recommendation and visual search operate only over `backend/data/catalog.json`.
-- **Tech choices explained** → See **Design** below.
-- **Optional LLM** → Works offline with local smalltalk; if `OPENAI_API_KEY` is set, chat upgrades automatically.
+- **Tech choices explained** → See **Design**.
+- **Optional LLM** → Runs offline; if `OPENAI_API_KEY` is set, chat auto‑upgrades.
 
 ---
 
-## 🚀 Quickstart
+## Quickstart
 
-### 1) Backend (FastAPI)
+### Backend (FastAPI)
 ```bash
 cd backend
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 uvicorn app:app --reload --port 8000
-# API docs → http://localhost:8000/docs
+# Docs → http://localhost:8000/docs
 # Health → http://localhost:8000/health
 ```
 
-*(Optional)* richer chat via OpenAI:
+Use OpenAI (optional):
 ```bash
 export OPENAI_API_KEY=sk-...          # Windows PowerShell: $env:OPENAI_API_KEY="sk-..."
 export OPENAI_MODEL=gpt-4o-mini
 uvicorn app:app --reload --port 8000
 ```
 
-*(Optional)* pre-download model weights to speed first request:
+Low‑disk mode (optional):
 ```bash
-python scripts/prewarm.py
+# Smaller image model to reduce downloads (you can skip image search entirely if space is very low)
+export IMAGE_MODEL=RN50
+export IMAGE_PRETRAINED=openai
+uvicorn app:app --reload --port 8000
 ```
 
-### 2) Frontend (Vite + React + Tailwind)
+### Frontend (Vite + React + Tailwind)
 ```bash
-cd ../frontend
-cp .env.example .env                  # VITE_API_BASE=http://localhost:8000
+cd frontend
+cp .env.example .env                  # ensure VITE_API_BASE=http://localhost:8000
 npm install
 npm run dev                           # UI → http://localhost:5173
 ```
 
 ---
 
-## 🧠 Agent Behavior
+## Agent Behavior
 
-- **Chat (`POST /api/chat`)**  
-  - If `OPENAI_API_KEY` is set → uses OpenAI with a neat system prompt.  
-  - Otherwise → `local-lite` smalltalk that clearly advertises capabilities.
+- **Chat (`POST /api/chat`)**
+  - With `OPENAI_API_KEY` → OpenAI chat.
+  - Without it → local smalltalk plus **intent routing** to recommendations.
 
-- **Text-based Recommendations (`POST /api/recommend`)**  
-  - Build a text corpus: `title | brand | category | description | tags`.  
-  - Encode with **MiniLM (all-MiniLM-L6-v2)**; cosine top‑k retrieval.
+- **Text Recommendations (`POST /api/recommend`)**
+  - Corpus = `title | brand | category | description | tags`.
+  - Embeddings + BM25 hybrid; returns top‑k products.
 
-- **Image-based Product Search (`POST /api/image-search`)**  
-  - Encode catalog images & query image using **CLIP (ViT-B/32)**; cosine top‑k neighbors.
+- **Image Search (`POST /api/image-search`)**
+  - CLIP encodes catalog and query image; returns nearest neighbors.
+  - If you skip `IMAGE_MODEL` exports, the endpoint returns empty (graceful).
 
-- **Catalog (`GET /api/catalog`)** → returns the items used by both recommenders.
+- **Catalog (`GET /api/catalog`)** → items used by both recommenders.
 
-- **Health (`GET /health`)** → sanity check with item count.
+- **Health (`GET /health`)** → sanity + item count.
 
 ---
 
-## 🧪 API Examples
+## API Examples
 
 ```bash
 # Chat
-curl -X POST http://localhost:8000/api/chat   -H "Content-Type: application/json"   -d '{"user_id":"demo","message":"What can you do?"}'
+curl -X POST http://localhost:8000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":"demo","message":"What can you do?"}'
 
 # Text recs
-curl -X POST http://localhost:8000/api/recommend   -H "Content-Type: application/json"   -d '{"user_id":"demo","query":"lightweight sports tee under $30","top_k":8}'
+curl -X POST http://localhost:8000/api/recommend \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":"demo","query":"lightweight sports tee under $30","top_k":8}'
 
 # Image search
-curl -X POST http://localhost:8000/api/image-search   -F "image_url=https://images.unsplash.com/photo-1516826957135-700dedea698c?q=80&w=800"
+curl -X POST http://localhost:8000/api/image-search \
+  -F "image_url=https://images.unsplash.com/photo-1516826957135-700dedea698c?q=80&w=800"
 
 # Catalog
 curl http://localhost:8000/api/catalog
@@ -87,19 +96,20 @@ curl http://localhost:8000/api/catalog
 
 ---
 
-## 🧱 Design
+## Design
 
-- **Unification**: one FastAPI app orchestrates chat + text recs + visual search for a consistent agent feel.
-- **Embeddings-first**: strong baseline without custom training; easy to swap in a vector DB later.
-- **Optional LLM**: graceful degradation; reviewers can run it offline.
-- **Frontend UX**: clean, modern styling with hero, badges, and helpful defaults.
-- **Maintainability**: thin services layer (`services/*`), typed schemas, and a clear catalog boundary.
+- **Unified agent**: one FastAPI service orchestrates chat + text recs + visual search.
+- **Embeddings-first**: strong zero‑shot baseline; easy to swap a vector DB later.
+- **Graceful degradation**: offline by default; LLM / larger models are opt‑in.
+- **Frontend UX**: dark neon theme; chat shows bullets and inline product cards.
+- **Maintainability**: thin `services/*`, typed `schemas.py`, clear catalog boundary.
 
-**Future work** (if time allowed): cross-encoder reranking, pgvector/Qdrant, click tracking + analytics, admin panel for catalog and embeddings refresh.
+**Future extensions (deferred due to disk/time):**
+- Larger CLIP (ViT‑B/32 or ViT‑L/14), pgvector/Qdrant, personalization, admin tools.
 
 ---
 
-## 🗂️ Repo Layout
+## Repo Layout
 
 ```
 ai-commerce-agent-pro/
@@ -110,7 +120,7 @@ ai-commerce-agent-pro/
 │   ├── data/
 │   │   └── catalog.json
 │   ├── scripts/
-│   │   └── prewarm.py
+│   │   └── prewarm.py             # optional; can be run later
 │   └── services/
 │       ├── chat.py
 │       ├── image_search.py
@@ -134,8 +144,16 @@ ai-commerce-agent-pro/
 
 ---
 
-## ⚠️ Notes
+## Notes
 
-- First run downloads model weights; `scripts/prewarm.py` shortens the wait.
-- Everything uses CPU by default.
-- Image-based search fetches remote images by URL; ensure you paste a valid public image link.
+- First run may download small model weights; if disk is tight, use `IMAGE_MODEL=RN50` or skip image search.
+- Everything runs on CPU by default.
+- For image search, paste a **direct** public image URL (ending in a real image path).
+
+## Screenshots (Demo)
+
+![Quote](assets/ss1.png)
+![Quote](assets/ss2.png)
+![Quote](assets/ss3.png)
+
+
