@@ -1,142 +1,1016 @@
 [
   {
-    "id": "p1",
-    "title": "AeroDry Run Tee",
+    "id": "301ce797826f",
+    "title": "AeroDry Run Tee (Black, S)",
     "category": "t-shirts",
     "description": "Lightweight moisture-wicking tee ideal for running and gym.",
-    "price": 24.99,
-    "image_url": "https://images.unsplash.com/photo-1516826957135-700dedea698c?q=80&w=800",
-    "brand": "Stratus",
+    "price": 25.27,
+    "image_url": "https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
     "tags": [
-      "sports",
-      "running",
-      "breathable"
+      "black",
+      "s"
     ]
   },
   {
-    "id": "p2",
-    "title": "TrailMax Sneakers",
-    "category": "shoes",
-    "description": "Rugged trail-running shoes with aggressive grip and toe protection.",
-    "price": 79.0,
-    "image_url": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=800",
-    "brand": "WildStep",
+    "id": "543be6535bb4",
+    "title": "AeroDry Run Tee (Black, M)",
+    "category": "t-shirts",
+    "description": "Lightweight moisture-wicking tee ideal for running and gym.",
+    "price": 24.04,
+    "image_url": "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
     "tags": [
-      "outdoor",
-      "trail",
-      "grippy"
+      "black",
+      "m"
     ]
   },
   {
-    "id": "p3",
-    "title": "FlexFit Training Shorts",
-    "category": "shorts",
-    "description": "4-way stretch training shorts with zip pocket for keys and cards.",
-    "price": 29.5,
-    "image_url": "https://images.unsplash.com/photo-1603252109334-43d2011b4dde?q=80&w=800",
-    "brand": "CoreWear",
+    "id": "08ffbfe94c7d",
+    "title": "AeroDry Run Tee (Black, L)",
+    "category": "t-shirts",
+    "description": "Lightweight moisture-wicking tee ideal for running and gym.",
+    "price": 24.54,
+    "image_url": "https://images.unsplash.com/photo-1520975682034-4e3aa7b2c0f8?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
     "tags": [
-      "gym",
-      "stretch",
-      "zipper-pocket"
+      "black",
+      "l"
     ]
   },
   {
-    "id": "p4",
-    "title": "Breeze Performance Tee",
+    "id": "97693cf8064f",
+    "title": "AeroDry Run Tee (White, S)",
+    "category": "t-shirts",
+    "description": "Lightweight moisture-wicking tee ideal for running and gym.",
+    "price": 24.44,
+    "image_url": "https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "white",
+      "s"
+    ]
+  },
+  {
+    "id": "efac1ba6bd11",
+    "title": "AeroDry Run Tee (White, M)",
+    "category": "t-shirts",
+    "description": "Lightweight moisture-wicking tee ideal for running and gym.",
+    "price": 25.46,
+    "image_url": "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "white",
+      "m"
+    ]
+  },
+  {
+    "id": "0d0294f64d58",
+    "title": "AeroDry Run Tee (White, L)",
+    "category": "t-shirts",
+    "description": "Lightweight moisture-wicking tee ideal for running and gym.",
+    "price": 25.34,
+    "image_url": "https://images.unsplash.com/photo-1520975682034-4e3aa7b2c0f8?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "white",
+      "l"
+    ]
+  },
+  {
+    "id": "c08070026372",
+    "title": "AeroDry Run Tee (Navy, S)",
+    "category": "t-shirts",
+    "description": "Lightweight moisture-wicking tee ideal for running and gym.",
+    "price": 25.77,
+    "image_url": "https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "navy",
+      "s"
+    ]
+  },
+  {
+    "id": "85aa8a20b53a",
+    "title": "AeroDry Run Tee (Navy, M)",
+    "category": "t-shirts",
+    "description": "Lightweight moisture-wicking tee ideal for running and gym.",
+    "price": 24.16,
+    "image_url": "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "navy",
+      "m"
+    ]
+  },
+  {
+    "id": "53f32fd6f4c7",
+    "title": "AeroDry Run Tee (Navy, L)",
+    "category": "t-shirts",
+    "description": "Lightweight moisture-wicking tee ideal for running and gym.",
+    "price": 24.83,
+    "image_url": "https://images.unsplash.com/photo-1520975682034-4e3aa7b2c0f8?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "navy",
+      "l"
+    ]
+  },
+  {
+    "id": "42db2656cf7b",
+    "title": "Breeze Performance Tee (Black, S)",
     "category": "t-shirts",
     "description": "Ultra-breathable mesh tee for high-intensity workouts.",
-    "price": 27.99,
-    "image_url": "https://images.unsplash.com/photo-1592878904946-b3cd8ae0f9bf?q=80&w=800",
+    "price": 26.94,
+    "image_url": "https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=1200&q=80",
     "brand": "Aero",
     "tags": [
-      "mesh",
-      "HIIT",
-      "lightweight"
+      "black",
+      "s"
     ]
   },
   {
-    "id": "p5",
-    "title": "CityStride Sneakers",
+    "id": "61943e152256",
+    "title": "Breeze Performance Tee (Black, M)",
+    "category": "t-shirts",
+    "description": "Ultra-breathable mesh tee for high-intensity workouts.",
+    "price": 27.36,
+    "image_url": "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "black",
+      "m"
+    ]
+  },
+  {
+    "id": "974c5e9b9461",
+    "title": "Breeze Performance Tee (Black, L)",
+    "category": "t-shirts",
+    "description": "Ultra-breathable mesh tee for high-intensity workouts.",
+    "price": 28.0,
+    "image_url": "https://images.unsplash.com/photo-1520975682034-4e3aa7b2c0f8?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "black",
+      "l"
+    ]
+  },
+  {
+    "id": "424de9cc1937",
+    "title": "Breeze Performance Tee (White, S)",
+    "category": "t-shirts",
+    "description": "Ultra-breathable mesh tee for high-intensity workouts.",
+    "price": 26.93,
+    "image_url": "https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "white",
+      "s"
+    ]
+  },
+  {
+    "id": "09b619c41344",
+    "title": "Breeze Performance Tee (White, M)",
+    "category": "t-shirts",
+    "description": "Ultra-breathable mesh tee for high-intensity workouts.",
+    "price": 27.32,
+    "image_url": "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "white",
+      "m"
+    ]
+  },
+  {
+    "id": "791c894b8a89",
+    "title": "Breeze Performance Tee (White, L)",
+    "category": "t-shirts",
+    "description": "Ultra-breathable mesh tee for high-intensity workouts.",
+    "price": 28.33,
+    "image_url": "https://images.unsplash.com/photo-1520975682034-4e3aa7b2c0f8?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "white",
+      "l"
+    ]
+  },
+  {
+    "id": "fe2b85d76d36",
+    "title": "Breeze Performance Tee (Navy, S)",
+    "category": "t-shirts",
+    "description": "Ultra-breathable mesh tee for high-intensity workouts.",
+    "price": 28.09,
+    "image_url": "https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "navy",
+      "s"
+    ]
+  },
+  {
+    "id": "17161fb8f45e",
+    "title": "Breeze Performance Tee (Navy, M)",
+    "category": "t-shirts",
+    "description": "Ultra-breathable mesh tee for high-intensity workouts.",
+    "price": 27.36,
+    "image_url": "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "navy",
+      "m"
+    ]
+  },
+  {
+    "id": "c5ec37a18421",
+    "title": "Breeze Performance Tee (Navy, L)",
+    "category": "t-shirts",
+    "description": "Ultra-breathable mesh tee for high-intensity workouts.",
+    "price": 28.19,
+    "image_url": "https://images.unsplash.com/photo-1520975682034-4e3aa7b2c0f8?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "navy",
+      "l"
+    ]
+  },
+  {
+    "id": "e6fe2262b0b8",
+    "title": "CityStride Sneakers (Black, 7)",
     "category": "shoes",
-    "description": "Everyday lifestyle sneakers with cushioned midsole and clean design.",
-    "price": 69.0,
-    "image_url": "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800",
+    "description": "Everyday lifestyle sneakers with cushioned midsole.",
+    "price": 70.71,
+    "image_url": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=1200&q=80",
     "brand": "UrbanWalk",
     "tags": [
-      "lifestyle",
-      "casual",
-      "cushion"
+      "black",
+      "7"
     ]
   },
   {
-    "id": "p6",
-    "title": "HeatGuard Hoodie",
+    "id": "30a84d92f6d4",
+    "title": "CityStride Sneakers (Black, 8)",
+    "category": "shoes",
+    "description": "Everyday lifestyle sneakers with cushioned midsole.",
+    "price": 66.28,
+    "image_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "black",
+      "8"
+    ]
+  },
+  {
+    "id": "4ff588bfc124",
+    "title": "CityStride Sneakers (Black, 9)",
+    "category": "shoes",
+    "description": "Everyday lifestyle sneakers with cushioned midsole.",
+    "price": 70.69,
+    "image_url": "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "black",
+      "9"
+    ]
+  },
+  {
+    "id": "abb0b58f9513",
+    "title": "CityStride Sneakers (White, 7)",
+    "category": "shoes",
+    "description": "Everyday lifestyle sneakers with cushioned midsole.",
+    "price": 70.09,
+    "image_url": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "white",
+      "7"
+    ]
+  },
+  {
+    "id": "d1a126cedc3a",
+    "title": "CityStride Sneakers (White, 8)",
+    "category": "shoes",
+    "description": "Everyday lifestyle sneakers with cushioned midsole.",
+    "price": 68.12,
+    "image_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "white",
+      "8"
+    ]
+  },
+  {
+    "id": "f4c7e31152ee",
+    "title": "CityStride Sneakers (White, 9)",
+    "category": "shoes",
+    "description": "Everyday lifestyle sneakers with cushioned midsole.",
+    "price": 67.1,
+    "image_url": "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "white",
+      "9"
+    ]
+  },
+  {
+    "id": "8db3b9fbe45a",
+    "title": "CityStride Sneakers (Navy, 7)",
+    "category": "shoes",
+    "description": "Everyday lifestyle sneakers with cushioned midsole.",
+    "price": 71.52,
+    "image_url": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "navy",
+      "7"
+    ]
+  },
+  {
+    "id": "dbe7042e88fb",
+    "title": "CityStride Sneakers (Navy, 8)",
+    "category": "shoes",
+    "description": "Everyday lifestyle sneakers with cushioned midsole.",
+    "price": 68.1,
+    "image_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "navy",
+      "8"
+    ]
+  },
+  {
+    "id": "17253d7a2c50",
+    "title": "CityStride Sneakers (Navy, 9)",
+    "category": "shoes",
+    "description": "Everyday lifestyle sneakers with cushioned midsole.",
+    "price": 66.75,
+    "image_url": "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "navy",
+      "9"
+    ]
+  },
+  {
+    "id": "7c434533e608",
+    "title": "TrailMax Sneakers (Black, 7)",
+    "category": "shoes",
+    "description": "Rugged trail-running shoes with aggressive grip.",
+    "price": 76.45,
+    "image_url": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "black",
+      "7"
+    ]
+  },
+  {
+    "id": "a7f45c820f85",
+    "title": "TrailMax Sneakers (Black, 8)",
+    "category": "shoes",
+    "description": "Rugged trail-running shoes with aggressive grip.",
+    "price": 81.2,
+    "image_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "black",
+      "8"
+    ]
+  },
+  {
+    "id": "6612c983b41e",
+    "title": "TrailMax Sneakers (Black, 9)",
+    "category": "shoes",
+    "description": "Rugged trail-running shoes with aggressive grip.",
+    "price": 79.66,
+    "image_url": "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "black",
+      "9"
+    ]
+  },
+  {
+    "id": "0300a0e928eb",
+    "title": "TrailMax Sneakers (White, 7)",
+    "category": "shoes",
+    "description": "Rugged trail-running shoes with aggressive grip.",
+    "price": 80.94,
+    "image_url": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "white",
+      "7"
+    ]
+  },
+  {
+    "id": "d649244934fe",
+    "title": "TrailMax Sneakers (White, 8)",
+    "category": "shoes",
+    "description": "Rugged trail-running shoes with aggressive grip.",
+    "price": 80.45,
+    "image_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "white",
+      "8"
+    ]
+  },
+  {
+    "id": "e97b5a56f82f",
+    "title": "TrailMax Sneakers (White, 9)",
+    "category": "shoes",
+    "description": "Rugged trail-running shoes with aggressive grip.",
+    "price": 79.23,
+    "image_url": "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "white",
+      "9"
+    ]
+  },
+  {
+    "id": "ff999dc2f493",
+    "title": "TrailMax Sneakers (Navy, 7)",
+    "category": "shoes",
+    "description": "Rugged trail-running shoes with aggressive grip.",
+    "price": 81.99,
+    "image_url": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "navy",
+      "7"
+    ]
+  },
+  {
+    "id": "6b414bbae117",
+    "title": "TrailMax Sneakers (Navy, 8)",
+    "category": "shoes",
+    "description": "Rugged trail-running shoes with aggressive grip.",
+    "price": 78.23,
+    "image_url": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "navy",
+      "8"
+    ]
+  },
+  {
+    "id": "0d63bc35c721",
+    "title": "TrailMax Sneakers (Navy, 9)",
+    "category": "shoes",
+    "description": "Rugged trail-running shoes with aggressive grip.",
+    "price": 79.33,
+    "image_url": "https://images.unsplash.com/photo-1520975916090-3105956dac38?auto=format&fit=crop&w=1200&q=80",
+    "brand": "UrbanWalk",
+    "tags": [
+      "navy",
+      "9"
+    ]
+  },
+  {
+    "id": "b3692a318dab",
+    "title": "FlexFit Training Shorts (Black, S)",
+    "category": "shorts",
+    "description": "4-way stretch training shorts with zip pocket.",
+    "price": 30.28,
+    "image_url": "https://images.unsplash.com/photo-1603252109334-43d2011b4dde?auto=format&fit=crop&w=1200&q=80",
+    "brand": "CoreWear",
+    "tags": [
+      "black",
+      "s"
+    ]
+  },
+  {
+    "id": "a38607a5c207",
+    "title": "FlexFit Training Shorts (Black, M)",
+    "category": "shorts",
+    "description": "4-way stretch training shorts with zip pocket.",
+    "price": 29.78,
+    "image_url": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1200&q=80",
+    "brand": "CoreWear",
+    "tags": [
+      "black",
+      "m"
+    ]
+  },
+  {
+    "id": "de510b973d3f",
+    "title": "FlexFit Training Shorts (Black, L)",
+    "category": "shorts",
+    "description": "4-way stretch training shorts with zip pocket.",
+    "price": 30.35,
+    "image_url": "https://images.unsplash.com/photo-1603252109334-43d2011b4dde?auto=format&fit=crop&w=1200&q=80",
+    "brand": "CoreWear",
+    "tags": [
+      "black",
+      "l"
+    ]
+  },
+  {
+    "id": "67255e43d0c6",
+    "title": "FlexFit Training Shorts (White, S)",
+    "category": "shorts",
+    "description": "4-way stretch training shorts with zip pocket.",
+    "price": 29.68,
+    "image_url": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1200&q=80",
+    "brand": "CoreWear",
+    "tags": [
+      "white",
+      "s"
+    ]
+  },
+  {
+    "id": "233cff5d183b",
+    "title": "FlexFit Training Shorts (White, M)",
+    "category": "shorts",
+    "description": "4-way stretch training shorts with zip pocket.",
+    "price": 29.98,
+    "image_url": "https://images.unsplash.com/photo-1603252109334-43d2011b4dde?auto=format&fit=crop&w=1200&q=80",
+    "brand": "CoreWear",
+    "tags": [
+      "white",
+      "m"
+    ]
+  },
+  {
+    "id": "e983cf1c4447",
+    "title": "FlexFit Training Shorts (White, L)",
+    "category": "shorts",
+    "description": "4-way stretch training shorts with zip pocket.",
+    "price": 28.43,
+    "image_url": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1200&q=80",
+    "brand": "CoreWear",
+    "tags": [
+      "white",
+      "l"
+    ]
+  },
+  {
+    "id": "d23197d721de",
+    "title": "FlexFit Training Shorts (Navy, S)",
+    "category": "shorts",
+    "description": "4-way stretch training shorts with zip pocket.",
+    "price": 28.86,
+    "image_url": "https://images.unsplash.com/photo-1603252109334-43d2011b4dde?auto=format&fit=crop&w=1200&q=80",
+    "brand": "CoreWear",
+    "tags": [
+      "navy",
+      "s"
+    ]
+  },
+  {
+    "id": "e72967482008",
+    "title": "FlexFit Training Shorts (Navy, M)",
+    "category": "shorts",
+    "description": "4-way stretch training shorts with zip pocket.",
+    "price": 29.0,
+    "image_url": "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=1200&q=80",
+    "brand": "CoreWear",
+    "tags": [
+      "navy",
+      "m"
+    ]
+  },
+  {
+    "id": "c5575b65355f",
+    "title": "FlexFit Training Shorts (Navy, L)",
+    "category": "shorts",
+    "description": "4-way stretch training shorts with zip pocket.",
+    "price": 28.51,
+    "image_url": "https://images.unsplash.com/photo-1603252109334-43d2011b4dde?auto=format&fit=crop&w=1200&q=80",
+    "brand": "CoreWear",
+    "tags": [
+      "navy",
+      "l"
+    ]
+  },
+  {
+    "id": "7db3b21350c6",
+    "title": "HeatGuard Hoodie (Black, S)",
     "category": "hoodies",
-    "description": "Midweight hoodie with brushed fleece interior for warmth.",
-    "price": 49.0,
-    "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800",
+    "description": "Midweight hoodie with brushed fleece interior.",
+    "price": 47.95,
+    "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=80",
     "brand": "Northline",
     "tags": [
-      "warm",
-      "fleece",
-      "winter"
+      "black",
+      "s"
     ]
   },
   {
-    "id": "p7",
-    "title": "SwiftDry Tank",
+    "id": "9f487900a07d",
+    "title": "HeatGuard Hoodie (Black, M)",
+    "category": "hoodies",
+    "description": "Midweight hoodie with brushed fleece interior.",
+    "price": 47.44,
+    "image_url": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Northline",
+    "tags": [
+      "black",
+      "m"
+    ]
+  },
+  {
+    "id": "1d0c170c8ede",
+    "title": "HeatGuard Hoodie (Black, L)",
+    "category": "hoodies",
+    "description": "Midweight hoodie with brushed fleece interior.",
+    "price": 48.13,
+    "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Northline",
+    "tags": [
+      "black",
+      "l"
+    ]
+  },
+  {
+    "id": "b56ba7b3b6d4",
+    "title": "HeatGuard Hoodie (White, S)",
+    "category": "hoodies",
+    "description": "Midweight hoodie with brushed fleece interior.",
+    "price": 49.53,
+    "image_url": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Northline",
+    "tags": [
+      "white",
+      "s"
+    ]
+  },
+  {
+    "id": "f536ecf2b24a",
+    "title": "HeatGuard Hoodie (White, M)",
+    "category": "hoodies",
+    "description": "Midweight hoodie with brushed fleece interior.",
+    "price": 48.47,
+    "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Northline",
+    "tags": [
+      "white",
+      "m"
+    ]
+  },
+  {
+    "id": "e8272edd72d9",
+    "title": "HeatGuard Hoodie (White, L)",
+    "category": "hoodies",
+    "description": "Midweight hoodie with brushed fleece interior.",
+    "price": 48.49,
+    "image_url": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Northline",
+    "tags": [
+      "white",
+      "l"
+    ]
+  },
+  {
+    "id": "f83c1b282ec6",
+    "title": "HeatGuard Hoodie (Navy, S)",
+    "category": "hoodies",
+    "description": "Midweight hoodie with brushed fleece interior.",
+    "price": 47.86,
+    "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Northline",
+    "tags": [
+      "navy",
+      "s"
+    ]
+  },
+  {
+    "id": "75055d2cfbb0",
+    "title": "HeatGuard Hoodie (Navy, M)",
+    "category": "hoodies",
+    "description": "Midweight hoodie with brushed fleece interior.",
+    "price": 48.09,
+    "image_url": "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Northline",
+    "tags": [
+      "navy",
+      "m"
+    ]
+  },
+  {
+    "id": "af3819ddad52",
+    "title": "HeatGuard Hoodie (Navy, L)",
+    "category": "hoodies",
+    "description": "Midweight hoodie with brushed fleece interior.",
+    "price": 50.71,
+    "image_url": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Northline",
+    "tags": [
+      "navy",
+      "l"
+    ]
+  },
+  {
+    "id": "96df42d0e080",
+    "title": "SwiftDry Tank (Black, S)",
     "category": "tanks",
     "description": "Sweat-wicking training tank with racerback fit.",
-    "price": 22.0,
-    "image_url": "https://images.unsplash.com/photo-1598978224661-5cf9ddb4ba44?q=80&w=800",
+    "price": 22.26,
+    "image_url": "https://images.unsplash.com/photo-1598978224661-5cf9ddb4ba44?auto=format&fit=crop&w=1200&q=80",
     "brand": "Aero",
     "tags": [
-      "tank",
-      "gym",
-      "sweat-wicking"
+      "black",
+      "s"
     ]
   },
   {
-    "id": "p8",
-    "title": "Commuter Backpack 20L",
+    "id": "47fa7d6289c2",
+    "title": "SwiftDry Tank (Black, M)",
+    "category": "tanks",
+    "description": "Sweat-wicking training tank with racerback fit.",
+    "price": 22.19,
+    "image_url": "https://images.unsplash.com/photo-1532074205216-d0e1f4b87368?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "black",
+      "m"
+    ]
+  },
+  {
+    "id": "aece275e8471",
+    "title": "SwiftDry Tank (Black, L)",
+    "category": "tanks",
+    "description": "Sweat-wicking training tank with racerback fit.",
+    "price": 21.42,
+    "image_url": "https://images.unsplash.com/photo-1598978224661-5cf9ddb4ba44?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "black",
+      "l"
+    ]
+  },
+  {
+    "id": "4930ff897aac",
+    "title": "SwiftDry Tank (White, S)",
+    "category": "tanks",
+    "description": "Sweat-wicking training tank with racerback fit.",
+    "price": 22.4,
+    "image_url": "https://images.unsplash.com/photo-1532074205216-d0e1f4b87368?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "white",
+      "s"
+    ]
+  },
+  {
+    "id": "2cc2ff13b041",
+    "title": "SwiftDry Tank (White, M)",
+    "category": "tanks",
+    "description": "Sweat-wicking training tank with racerback fit.",
+    "price": 21.41,
+    "image_url": "https://images.unsplash.com/photo-1598978224661-5cf9ddb4ba44?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "white",
+      "m"
+    ]
+  },
+  {
+    "id": "b99edbbf8baf",
+    "title": "SwiftDry Tank (White, L)",
+    "category": "tanks",
+    "description": "Sweat-wicking training tank with racerback fit.",
+    "price": 21.79,
+    "image_url": "https://images.unsplash.com/photo-1532074205216-d0e1f4b87368?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "white",
+      "l"
+    ]
+  },
+  {
+    "id": "532382671602",
+    "title": "SwiftDry Tank (Navy, S)",
+    "category": "tanks",
+    "description": "Sweat-wicking training tank with racerback fit.",
+    "price": 22.86,
+    "image_url": "https://images.unsplash.com/photo-1598978224661-5cf9ddb4ba44?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "navy",
+      "s"
+    ]
+  },
+  {
+    "id": "47bd621646b0",
+    "title": "SwiftDry Tank (Navy, M)",
+    "category": "tanks",
+    "description": "Sweat-wicking training tank with racerback fit.",
+    "price": 22.25,
+    "image_url": "https://images.unsplash.com/photo-1532074205216-d0e1f4b87368?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "navy",
+      "m"
+    ]
+  },
+  {
+    "id": "b7a177536aa5",
+    "title": "SwiftDry Tank (Navy, L)",
+    "category": "tanks",
+    "description": "Sweat-wicking training tank with racerback fit.",
+    "price": 22.1,
+    "image_url": "https://images.unsplash.com/photo-1598978224661-5cf9ddb4ba44?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Aero",
+    "tags": [
+      "navy",
+      "l"
+    ]
+  },
+  {
+    "id": "2cf481d227bf",
+    "title": "Commuter Backpack 20L (Black)",
     "category": "bags",
     "description": "Water-resistant backpack with padded laptop sleeve.",
-    "price": 59.0,
-    "image_url": "https://images.unsplash.com/photo-1548013146-72479768bada?q=80&w=800",
+    "price": 59.87,
+    "image_url": "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1200&q=80",
     "brand": "Transit",
     "tags": [
-      "bag",
-      "laptop",
-      "water-resistant"
+      "black",
+      "20l"
     ]
   },
   {
-    "id": "p9",
-    "title": "Studio Training Leggings",
+    "id": "04daf1a28fb6",
+    "title": "Commuter Backpack 20L (White)",
+    "category": "bags",
+    "description": "Water-resistant backpack with padded laptop sleeve.",
+    "price": 60.62,
+    "image_url": "https://images.unsplash.com/photo-1500043357865-c6b8827edf24?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Transit",
+    "tags": [
+      "white",
+      "20l"
+    ]
+  },
+  {
+    "id": "006db8ec21ba",
+    "title": "Commuter Backpack 20L (Navy)",
+    "category": "bags",
+    "description": "Water-resistant backpack with padded laptop sleeve.",
+    "price": 60.3,
+    "image_url": "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1200&q=80",
+    "brand": "Transit",
+    "tags": [
+      "navy",
+      "20l"
+    ]
+  },
+  {
+    "id": "998ffaff4b40",
+    "title": "Studio Training Leggings (Black, XS)",
     "category": "leggings",
-    "description": "High-rise leggings with squat-proof fabric and phone pocket.",
-    "price": 39.0,
-    "image_url": "https://images.unsplash.com/photo-1549570652-97324981a6fd?q=80&w=800",
+    "description": "High-rise leggings with squat-proof fabric.",
+    "price": 38.15,
+    "image_url": "https://images.unsplash.com/photo-1549570652-97324981a6fd?auto=format&fit=crop&w=1200&q=80",
     "brand": "FlowFit",
     "tags": [
-      "leggings",
-      "studio",
-      "pocket"
+      "black",
+      "xs"
     ]
   },
   {
-    "id": "p10",
-    "title": "ThermaBottle 750ml",
+    "id": "17c1c1d71e0c",
+    "title": "Studio Training Leggings (Black, S)",
+    "category": "leggings",
+    "description": "High-rise leggings with squat-proof fabric.",
+    "price": 37.54,
+    "image_url": "https://images.unsplash.com/photo-1534367610401-9f51e1b0a7f1?auto=format&fit=crop&w=1200&q=80",
+    "brand": "FlowFit",
+    "tags": [
+      "black",
+      "s"
+    ]
+  },
+  {
+    "id": "4e2df6d12313",
+    "title": "Studio Training Leggings (Black, M)",
+    "category": "leggings",
+    "description": "High-rise leggings with squat-proof fabric.",
+    "price": 38.42,
+    "image_url": "https://images.unsplash.com/photo-1549570652-97324981a6fd?auto=format&fit=crop&w=1200&q=80",
+    "brand": "FlowFit",
+    "tags": [
+      "black",
+      "m"
+    ]
+  },
+  {
+    "id": "880fb36805c8",
+    "title": "Studio Training Leggings (White, XS)",
+    "category": "leggings",
+    "description": "High-rise leggings with squat-proof fabric.",
+    "price": 38.28,
+    "image_url": "https://images.unsplash.com/photo-1534367610401-9f51e1b0a7f1?auto=format&fit=crop&w=1200&q=80",
+    "brand": "FlowFit",
+    "tags": [
+      "white",
+      "xs"
+    ]
+  },
+  {
+    "id": "41013077ac51",
+    "title": "Studio Training Leggings (White, S)",
+    "category": "leggings",
+    "description": "High-rise leggings with squat-proof fabric.",
+    "price": 38.1,
+    "image_url": "https://images.unsplash.com/photo-1549570652-97324981a6fd?auto=format&fit=crop&w=1200&q=80",
+    "brand": "FlowFit",
+    "tags": [
+      "white",
+      "s"
+    ]
+  },
+  {
+    "id": "d5025724a627",
+    "title": "Studio Training Leggings (White, M)",
+    "category": "leggings",
+    "description": "High-rise leggings with squat-proof fabric.",
+    "price": 40.38,
+    "image_url": "https://images.unsplash.com/photo-1534367610401-9f51e1b0a7f1?auto=format&fit=crop&w=1200&q=80",
+    "brand": "FlowFit",
+    "tags": [
+      "white",
+      "m"
+    ]
+  },
+  {
+    "id": "af3954306a66",
+    "title": "Studio Training Leggings (Navy, XS)",
+    "category": "leggings",
+    "description": "High-rise leggings with squat-proof fabric.",
+    "price": 40.17,
+    "image_url": "https://images.unsplash.com/photo-1549570652-97324981a6fd?auto=format&fit=crop&w=1200&q=80",
+    "brand": "FlowFit",
+    "tags": [
+      "navy",
+      "xs"
+    ]
+  },
+  {
+    "id": "f1f395773d70",
+    "title": "Studio Training Leggings (Navy, S)",
+    "category": "leggings",
+    "description": "High-rise leggings with squat-proof fabric.",
+    "price": 38.42,
+    "image_url": "https://images.unsplash.com/photo-1534367610401-9f51e1b0a7f1?auto=format&fit=crop&w=1200&q=80",
+    "brand": "FlowFit",
+    "tags": [
+      "navy",
+      "s"
+    ]
+  },
+  {
+    "id": "f08599f156a0",
+    "title": "Studio Training Leggings (Navy, M)",
+    "category": "leggings",
+    "description": "High-rise leggings with squat-proof fabric.",
+    "price": 39.48,
+    "image_url": "https://images.unsplash.com/photo-1549570652-97324981a6fd?auto=format&fit=crop&w=1200&q=80",
+    "brand": "FlowFit",
+    "tags": [
+      "navy",
+      "m"
+    ]
+  },
+  {
+    "id": "c6de01e66d5b",
+    "title": "ThermaBottle 750ml (Black)",
     "category": "bottles",
-    "description": "Double-wall insulated bottle keeps drinks cold for 24h.",
-    "price": 19.99,
-    "image_url": "https://images.unsplash.com/photo-1598986646512-3f2b36ebd9d8?q=80&w=800",
+    "description": "Double-wall insulated bottle keeps drinks cold 24h.",
+    "price": 19.82,
+    "image_url": "https://images.unsplash.com/photo-1598986646512-3f2b36ebd9d8?auto=format&fit=crop&w=1200&q=80",
     "brand": "HydroPeak",
     "tags": [
-      "bottle",
-      "insulated",
-      "steel"
+      "black",
+      "750ml"
+    ]
+  },
+  {
+    "id": "8d1df74e99d6",
+    "title": "ThermaBottle 750ml (White)",
+    "category": "bottles",
+    "description": "Double-wall insulated bottle keeps drinks cold 24h.",
+    "price": 20.65,
+    "image_url": "https://images.unsplash.com/photo-1532634896-26909d0d4b6a?auto=format&fit=crop&w=1200&q=80",
+    "brand": "HydroPeak",
+    "tags": [
+      "white",
+      "750ml"
+    ]
+  },
+  {
+    "id": "944fc0e257f5",
+    "title": "ThermaBottle 750ml (Navy)",
+    "category": "bottles",
+    "description": "Double-wall insulated bottle keeps drinks cold 24h.",
+    "price": 19.92,
+    "image_url": "https://images.unsplash.com/photo-1598986646512-3f2b36ebd9d8?auto=format&fit=crop&w=1200&q=80",
+    "brand": "HydroPeak",
+    "tags": [
+      "navy",
+      "750ml"
     ]
   }
 ]

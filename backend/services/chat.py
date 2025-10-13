@@ -1,4 +1,5 @@
 import os
+import re
 from typing import Optional
 from openai import OpenAI
 
@@ -31,12 +32,26 @@ def openai_chat(message: str) -> str:
     )
     return resp.choices[0].message.content.strip()
 
+def _norm(s: str) -> str:
+    s = s.lower()
+    s = s.replace("’", "'")
+    s = re.sub(r"[^a-z0-9\s']", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
 def local_smalltalk(message: str) -> str:
-    m = message.lower().strip()
-    if "name" in m:
-        return "I'm Mercury. I can recommend products from the catalog and find similar items from a photo URL."
-    if any(k in m for k in ["what can you do","help","capabilities","how can you help"]):
-        return "I can: 1) chat, 2) recommend items from our catalog from a text request, 3) find similar items from an image URL."
-    if any(k in m for k in ["hi","hello","hey"]):
+    m = _norm(message)
+
+    if m in {"hi","hey","hello","yo","hi there","hello there"} or any(w in m for w in ["good morning","good evening","good afternoon"]):
         return "Hi! Tell me what you’re shopping for (e.g., “breathable running tee under $30”)."
+
+    if any(kw in m for kw in ["what can you do","what can u do","capabilities","how can you help","help me","what do you do","what are you able","what are your abilities"]):
+        return "I can chat, recommend products from our catalog based on your text, and find visually similar items from an image URL."
+
+    if any(kw in m for kw in ["who are you","who r you","who you are","introduce yourself","tell me about you"]):
+        return "I’m Mercury—your shopping agent for this catalog. Ask me for items, budgets, or paste an image to search visually."
+
+    if any(kw in m for kw in ["what is your name","whats your name","what's your name","your name","name please","who are u"]):
+        return "I'm Mercury. I can recommend products from the catalog and find similar items from a photo URL."
+
     return "Try a shopping request like: “lightweight running tee under $30” or paste an image URL."

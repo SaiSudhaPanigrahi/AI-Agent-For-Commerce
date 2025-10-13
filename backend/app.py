@@ -1,14 +1,14 @@
 import os, json, re
+from urllib.parse import urlparse, parse_qs, unquote
 from fastapi import FastAPI, Form
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any, Optional
-from urllib.parse import urlparse, parse_qs, unquote
 from schemas import ChatRequest, ChatResponse, RecommendRequest, RecommendResponse, ImageSearchResponse, CatalogResponse, Product
 from services.chat import openai_chat, local_smalltalk, has_openai
 from services.recommender import TextRecommender
 from services.image_search import ImageSearch
 
-app = FastAPI(title="AI Commerce Agent API", version="1.0.3")
+app = FastAPI(title="AI Commerce Agent API", version="1.0.4")
 
 app.add_middleware(
     CORSMiddleware,
@@ -60,14 +60,30 @@ def is_shopping_query(msg: str) -> bool:
 def shortlist(items: List[Dict[str, Any]], n: int = 6) -> List[Dict[str, Any]]:
     return items[:n]
 
-def format_list(items: List[Dict[str, Any]], header: str = "Here are some picks:") -> str:
-    if not items: return "No matching items found in the catalog."
-    out = [header]
-    for i, p in enumerate(items, 1):
+
+def bullet_list(items: List[Dict[str, Any]]) -> str:
+    if not items:
+        return "No matching items found in the catalog."
+    out = ["Here are some picks:"]
+    for p in items:
         price = f"${p.get('price', 0):.2f}"
-        out.append(f"{i}. {p.get('title')} — {price} ({(p.get('brand') or '')} · {(p.get('category') or '')})")
-    out.append("You can refine the request or paste an image URL to find visually similar items.")
+        out.append(f"- {p.get('title')} — {price} ({(p.get('brand') or '')} · {(p.get('category') or '')})")
     return "\n".join(out)
+
+
+def extract_image_url(raw: str) -> Optional[str]:
+    m = re.search(r'(https?://\S+)', raw)
+    if not m: return None
+    url = m.group(1)
+    try:
+        u = urlparse(url)
+        if u.netloc.endswith("google.com"):
+            qs = parse_qs(u.query)
+            if "imgurl" in qs and qs["imgurl"]:
+                return unquote(qs["imgurl"][0])
+        return url
+    except Exception:
+        return url
 
 def route_recommendation(msg: str) -> List[Dict[str, Any]]:
     price_cap = parse_price_limit(msg)
@@ -80,20 +96,6 @@ def route_recommendation(msg: str) -> List[Dict[str, Any]]:
     if not results:
         results = _recommender.search(" ".join([cat or "", msg]), top_k=16)
     return shortlist(results, n=6)
-
-def extract_image_url(msg: str) -> Optional[str]:
-    m = re.search(r'(https?://\S+)', msg)
-    if not m: return None
-    url = m.group(1)
-    try:
-        u = urlparse(url)
-        if u.netloc.endswith("google.com"):
-            qs = parse_qs(u.query)
-            if "imgurl" in qs and qs["imgurl"]:
-                return unquote(qs["imgurl"][0])
-        return url
-    except Exception:
-        return url
 
 @app.get("/health")
 def health():
@@ -114,14 +116,12 @@ def chat(req: ChatRequest) -> ChatResponse:
         if img_url:
             try:
                 items = _image_search.search_by_image_url(image_url=img_url, top_k=8)
-                reply = format_list(items, header="Here are visually similar picks:")
-                return ChatResponse(reply=reply, mode="local-lite")
-            except Exception as e:
-                return ChatResponse(reply="Could not process that image URL. Try a direct image link (ending in .jpg/.png) or use the Image Search box.", mode="local-lite")
+                return ChatResponse(reply=bullet_list(items), mode="local-lite", items=[Product(**p) for p in items])
+            except Exception:
+                return ChatResponse(reply="Could not process that image URL. Try a direct image link ending in .jpg or .png.", mode="local-lite")
         if is_shopping_query(msg) or parse_price_limit(msg) or parse_category(msg):
             items = route_recommendation(msg)
-            reply = format_list(items)
-            return ChatResponse(reply=reply, mode="local-lite")
+            return ChatResponse(reply=bullet_list(items), mode="local-lite", items=[Product(**p) for p in items])
         reply = local_smalltalk(msg)
         return ChatResponse(reply=reply, mode="local-lite")
     except Exception as e:
@@ -134,5 +134,6 @@ def recommend(req: RecommendRequest) -> RecommendResponse:
 
 @app.post("/api/image-search", response_model=ImageSearchResponse)
 def image_search(image_url: str = Form(...)) -> ImageSearchResponse:
-    items = _image_search.search_by_image_url(image_url=image_url, top_k=8)
+    url = extract_image_url(image_url) or image_url
+    items = _image_search.search_by_image_url(image_url=url, top_k=8)
     return ImageSearchResponse(items=[Product(**p) for p in items])

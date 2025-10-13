@@ -18,6 +18,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
     mode: Literal["local-lite","openai"]
+    items: Optional[List[Product]] = None
 
 class RecommendRequest(BaseModel):
     user_id: str = Field(default="demo")
