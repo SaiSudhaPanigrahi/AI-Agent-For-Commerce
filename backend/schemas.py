@@ -17,7 +17,7 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     reply: str
-    mode: Literal["local-lite","openai"]
+    mode: Literal["local-lite","openai","ollama-agent"]
     items: Optional[List[Product]] = None
 
 class RecommendRequest(BaseModel):
