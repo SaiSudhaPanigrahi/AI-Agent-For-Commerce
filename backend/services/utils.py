@@ -1,7 +1,22 @@
+
 import numpy as np
 from typing import Tuple
 
-def cosine_topk(matrix: np.ndarray, query: np.ndarray, k: int) -> Tuple[list, np.ndarray]:
-    sims = matrix @ query / (np.linalg.norm(matrix, axis=1) * (np.linalg.norm(query) + 1e-10) + 1e-10)
-    idxs = np.argsort(-sims)[:k]
-    return idxs.tolist(), sims[idxs]
+def l2_normalize(x: np.ndarray, eps: float = 1e-9) -> np.ndarray:
+    n = np.linalg.norm(x, axis=-1, keepdims=True) + eps
+    return x / n
+
+def cosine_sim(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+    a = l2_normalize(a)
+    b = l2_normalize(b)
+    return a @ b.T
+
+def topk_indices(scores: np.ndarray, k: int) -> Tuple[np.ndarray, np.ndarray]:
+    k = min(k, scores.shape[1])
+    idxs = np.argpartition(-scores, kth=k-1, axis=1)[:, :k]
+    # sort within top-k
+    part = np.take_along_axis(scores, idxs, axis=1)
+    order = np.argsort(-part, axis=1)
+    sorted_idxs = np.take_along_axis(idxs, order, axis=1)
+    sorted_scores = np.take_along_axis(scores, sorted_idxs, axis=1)
+    return sorted_idxs, sorted_scores

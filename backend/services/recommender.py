@@ -1,44 +1,57 @@
-from typing import List, Dict, Any, Tuple
+
 import re
-import numpy as np
-import faiss
-from rank_bm25 import BM25Okapi
-from sentence_transformers import SentenceTransformer
+from typing import List, Dict, Any
+from .rag import RAGIndex
 
-def _build_text(p: Dict[str, Any]) -> str:
-    parts = [p.get("title",""), p.get("brand",""), p.get("category",""), p.get("description","")]
-    if p.get("tags"):
-        parts.append(" ".join(p["tags"]))
-    return " | ".join([x for x in parts if x])
+_COLOR_WORDS = [
+    "red","blue","green","black","white","pink","brown","beige","teal","navy","grey","gray","yellow","purple","orange"
+]
+_CAT_WORDS = {
+    "bag":"bags","bags":"bags",
+    "shoe":"shoes","shoes":"shoes",
+    "jacket":"jackets","jackets":"jackets",
+    "cap":"caps","caps":"caps",
+    "top":"tops","tops":"tops",
+    "dress":"dresses","dresses":"dresses",
+    "pant":"pants","pants":"pants",
+}
 
-def _tokenize(s: str) -> List[str]:
-    return re.findall(r"[A-Za-z0-9]+", s.lower())
+_PRICE_UNDER = re.compile(r"under\s*\$?(\d+)|<=\s*\$?(\d+)", re.I)
+_PRICE_OVER = re.compile(r"over\s*\$?(\d+)|>=\s*\$?(\d+)", re.I)
 
 class HybridRecommender:
-    def __init__(self, products: List[Dict[str, Any]], embed_model_name: str = "all-MiniLM-L6-v2"):
+    def __init__(self, products: List[Dict[str, Any]]):
         self.products = products
-        self.corpus = [_build_text(p) for p in products]
-        self.tokens = [_tokenize(c) for c in self.corpus]
-        self.bm25 = BM25Okapi(self.tokens)
-        self.model = SentenceTransformer(embed_model_name)
-        emb = self.model.encode(self.corpus, normalize_embeddings=True, show_progress_bar=False)
-        self.emb = np.asarray(emb, dtype="float32")
-        self.index = faiss.IndexFlatIP(self.emb.shape[1])
-        self.index.add(self.emb)
+        self.rag = RAGIndex(products)
 
-    def search(self, query: str, top_k: int = 8) -> List[Dict[str, Any]]:
-        qv = self.model.encode([query], normalize_embeddings=True)
-        qv = np.asarray(qv, dtype="float32")
-        N = max(64, top_k * 6)
-        sims, idxs = self.index.search(qv, N)
-        idxs = idxs[0].tolist()
-        sims = sims[0].tolist()
-        scores = {}
-        for i, s in zip(idxs, sims):
-            scores[i] = scores.get(i, 0.0) + 0.6 * float(s)
-        bm = self.bm25.get_scores(_tokenize(query))
-        order = sorted(range(len(bm)), key=lambda i: bm[i], reverse=True)[:N]
-        for rank, i in enumerate(order, 1):
-            scores[i] = scores.get(i, 0.0) + 0.4 * (1.0 / rank)
-        top = sorted(scores.items(), key=lambda kv: kv[1], reverse=True)[:top_k]
-        return [self.products[i] for i, _ in top]
+    def _apply_filters(self, items: List[Dict[str,Any]], q: str) -> List[Dict[str,Any]]:
+        ql = q.lower()
+        # color
+        colors = [c for c in _COLOR_WORDS if c in ql]
+        if colors:
+            items = [p for p in items if p.get("color") and any(c in p["color"].lower() for c in colors)]
+        # category
+        cats = [v for k,v in _CAT_WORDS.items() if k in ql]
+        if cats:
+            items = [p for p in items if p.get("category") in cats]
+        # price
+        price_max = None
+        m = _PRICE_UNDER.search(ql)
+        if m:
+            price_max = float(m.group(1) or m.group(2))
+        price_min = None
+        m = _PRICE_OVER.search(ql)
+        if m:
+            price_min = float(m.group(1) or m.group(2))
+        if price_max is not None:
+            items = [p for p in items if float(p.get("price", 0)) <= price_max]
+        if price_min is not None:
+            items = [p for p in items if float(p.get("price", 0)) >= price_min]
+        return items
+
+    def recommend(self, query: str, k: int = 8) -> List[Dict[str, Any]]:
+        # initial RAG retrieval
+        cand = self.rag.search_products(query, k=k*2)
+        # filters
+        cand = self._apply_filters(cand, query)
+        return cand[:k]

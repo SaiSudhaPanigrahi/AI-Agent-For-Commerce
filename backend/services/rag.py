@@ -1,78 +1,68 @@
-import os, re
-from typing import List, Dict, Any, Tuple, Optional, Set
+
+import re
+from typing import List, Dict, Any, Tuple
 import numpy as np
-import faiss
 from rank_bm25 import BM25Okapi
-from sentence_transformers.SentenceTransformer import SentenceTransformer
+from sentence_transformers import SentenceTransformer
+try:
+    import faiss  # faiss-cpu (optional)
+except Exception:
+    faiss = None
 
-def chunk_text(s: str, max_words: int = 120, overlap: int = 20) -> List[str]:
-    toks = re.findall(r"\w+|\S", s)
-    chunks = []
-    i = 0
-    n = len(toks)
-    while i < n:
-        j = min(n, i + max_words)
-        chunk = " ".join(toks[i:j])
-        if chunk.strip():
-            chunks.append(chunk)
-        if j >= n: break
-        i = j - overlap
-        if i < 0: i = 0
-    return chunks
+from .utils import cosine_sim
 
-class RAG:
-    def __init__(self, products: List[Dict[str, Any]], embed_model_name: str = "all-MiniLM-L6-v2"):
+_WORD = re.compile(r"\w+|\S")
+
+def _product_text(p: Dict[str, Any]) -> str:
+    parts = [p.get("title",""), p.get("brand",""), p.get("category",""), p.get("color",""), p.get("description","") ]
+    return " ".join([str(x) for x in parts if x])
+
+def _tokenize(s: str) -> List[str]:
+    return [w.lower() for w in _WORD.findall(s)]
+
+class RAGIndex:
+    def __init__(self, products: List[Dict[str, Any]], model_name: str = "all-MiniLM-L6-v2"):
         self.products = products
-        self.embed = SentenceTransformer(embed_model_name)
-        self.chunks, self.meta = self._build_chunks(products)
-        self.emb = self.embed.encode(self.chunks, normalize_embeddings=True, show_progress_bar=False).astype("float32")
-        self.index = faiss.IndexFlatIP(self.emb.shape[1])
-        self.index.add(self.emb)
-        tokenized = [c.lower().split() for c in self.chunks]
-        self.bm25 = BM25Okapi(tokenized)
+        self.chunks: List[str] = []
+        self.meta: List[Tuple[int,int]] = []  # (product_idx, chunk_id)
+        for i, p in enumerate(products):
+            text = _product_text(p)
+            self.chunks.append(text)
+            self.meta.append((i, 0))
+        # BM25
+        self.bm25 = BM25Okapi([_tokenize(c) for c in self.chunks])
+        # Embeddings
+        self.model = SentenceTransformer(model_name)
+        self.emb = self.model.encode(self.chunks, convert_to_numpy=True, normalize_embeddings=True)
+        # FAISS index optional
+        if faiss is not None:
+            d = self.emb.shape[1]
+            self.index = faiss.IndexFlatIP(d)
+            self.index.add(self.emb.astype('float32'))
+        else:
+            self.index = None
 
-    def _build_chunks(self, products: List[Dict[str, Any]]) -> Tuple[List[str], List[Dict[str,Any]]]:
-        chunks = []
-        meta = []
-        for p in products:
-            pid = str(p.get("id") or p.get("sku") or p.get("title"))
-            title = p.get("title","")
-            brand = p.get("brand","")
-            cat = p.get("category","")
-            desc = p.get("description","") or ""
-            tags = " ".join(p.get("tags") or [])
-            base = f"{title} | {brand} | {cat} | {tags}\n{desc}"
-            cs = chunk_text(base, 120, 20)
-            for c in cs:
-                chunks.append(c)
-                meta.append({"product_id": pid, "title": title, "brand": brand, "category": cat})
-        return chunks, meta
+    def _semantic_top(self, q: str, k: int) -> List[int]:
+        qv = self.model.encode([q], convert_to_numpy=True, normalize_embeddings=True)
+        if self.index is not None:
+            D, I = self.index.search(qv.astype('float32'), k)
+            return I[0].tolist()
+        sims = cosine_sim(qv, self.emb)[0]
+        order = np.argsort(-sims)[:k]
+        return order.tolist()
 
-    def retrieve(self, query: str, k: int = 12, hint_ids: Optional[Set[str]] = None) -> List[Tuple[str, Dict[str, Any], float]]:
-        qv = self.embed.encode([query], normalize_embeddings=True).astype("float32")
-        sims, idxs = self.index.search(qv, max(k*8, 64))
-        idxs = idxs[0].tolist()
-        sims = sims[0].tolist()
-        scores = {}
-        for i, s in zip(idxs, sims):
-            scores[i] = scores.get(i, 0.0) + 0.6 * float(s)
-        bm = self.bm25.get_scores(query.lower().split())
-        order = sorted(range(len(bm)), key=lambda i: bm[i], reverse=True)[:max(k*8,64)]
-        for rank, i in enumerate(order, 1):
-            scores[i] = scores.get(i, 0.0) + 0.4 * (1.0 / rank)
-        if hint_ids:
-            for i in list(scores.keys()):
-                pid = str(self.meta[i]["product_id"])
-                if pid in hint_ids:
-                    scores[i] += 0.05
-        top = sorted(scores.items(), key=lambda kv: kv[1], reverse=True)[:k]
-        out = [(self.chunks[i], self.meta[i], float(sc)) for i, sc in top]
-        return out
-
-    def top_products_from_chunks(self, chunks: List[Tuple[str, Dict[str, Any], float]], top_n: int = 3) -> List[str]:
-        agg = {}
-        for _, m, s in chunks:
-            pid = str(m["product_id"])
-            agg[pid] = agg.get(pid, 0.0) + s
-        top = sorted(agg.items(), key=lambda kv: kv[1], reverse=True)[:top_n]
-        return [pid for pid,_ in top]
+    def search_products(self, query: str, k: int = 8) -> List[Dict[str, Any]]:
+        tokens = _tokenize(query)
+        bm25_scores = self.bm25.get_scores(tokens)
+        bm25_top = np.argsort(-bm25_scores)[:k*2]
+        sem_top = self._semantic_top(query, k*2)
+        # fuse
+        seen = set()
+        ordered = []
+        for idx in list(bm25_top) + list(sem_top):
+            if idx not in seen and 0 <= idx < len(self.meta):
+                seen.add(idx)
+                prod_idx, _ = self.meta[idx]
+                if prod_idx not in [o.get('id') for o in ordered]:
+                    ordered.append(self.products[prod_idx])
+        return ordered[:k]

@@ -1,45 +1,62 @@
-import os, json, re, requests
-from typing import Dict, Any, Optional, Tuple, List
 
-def has_ollama() -> bool:
-    return bool(os.environ.get("OLLAMA_BASE_URL")) and bool(os.environ.get("OLLAMA_MODEL"))
+import os, json, requests
+from typing import Dict, Tuple, Any
 
-def _ollama_chat(messages: List[Dict[str,str]], temperature: float = 0.2, json_mode: bool = False) -> str:
-    url = os.environ.get("OLLAMA_BASE_URL", "http://127.0.0.1:11434").rstrip("/") + "/api/chat"
-    model = os.environ.get("OLLAMA_MODEL", "llama3.2:3b-instruct")
-    payload = {"model": model, "messages": messages, "stream": False, "options": {"temperature": temperature}}
-    if json_mode:
-        payload["format"] = "json"
-    r = requests.post(url, json=payload, timeout=120)
-    r.raise_for_status()
-    data = r.json()
-    return data.get("message", {}).get("content", "")
+OLLAMA_BASE = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
 
-def plan_with_llm(user_msg: str) -> Tuple[str, Dict[str, Any]]:
-    sys = "You decide which single tool to use: text-recommend, image-search, smalltalk, qa-rag. Use image-search only if a direct image URL is present. For qa-rag, the user is asking to compare, explain, justify, or ask product questions. Respond as strict JSON: {\"tool\":\"...\",\"args\":{...}}. Valid args: for text-recommend: {\"query\": \"...\"}; for image-search: {\"image_url\":\"...\"}; for smalltalk: {\"message\":\"...\"}; for qa-rag: {\"question\":\"...\"}."
-    usr = f"User: {user_msg}"
-    out = _ollama_chat([{"role":"system","content":sys},{"role":"user","content":usr}], temperature=0.1, json_mode=False)
-    j = None
+PLANNER_SYSTEM = (
+    "You are a shopping agent planner. Choose a tool and strictly return JSON with keys: tool, args. "
+    "Tools: 'recommend' (args {query:string, top_k?:int}), 'chitchat' (args {message:string}). "
+    "Examples: {\"tool\":\"recommend\",\"args\":{\"query\":\"red running shoes under $80\",\"top_k\":8}} "
+    "or {\"tool\":\"chitchat\",\"args\":{\"message\":\"What can you do?\"}}. "
+    "Never include extra text."
+)
+
+ANSWER_SYSTEM = (
+    "You are Mercury, a concise shopping assistant. Use the provided PRODUCT CONTEXT to ground your answer. "
+    "Do NOT invent products not present in the context."
+
+)
+
+def _ollama_chat(messages: list[dict]) -> str:
+    url = f"{OLLAMA_BASE}/api/chat"
+    resp = requests.post(url, json={"model": OLLAMA_MODEL, "messages": messages, "stream": False}, timeout=120)
+    resp.raise_for_status()
+    data = resp.json()
+    if isinstance(data, dict):
+        # new-ish Ollama responses
+        msg = data.get("message", {}).get("content") or data.get("response") or ""
+        return msg
+    return ""
+
+def plan_with_llm(user_msg: str) -> Tuple[str, Dict[str, Any], str]:
+    messages = [
+        {"role": "system", "content": PLANNER_SYSTEM},
+        {"role": "user", "content": user_msg},
+    ]
+    raw = _ollama_chat(messages)
     try:
-        j = json.loads(out)
+        data = json.loads(raw.strip())
     except Exception:
-        m = re.search(r"\{.*\}", out, re.S)
-        if m:
-            try:
-                j = json.loads(m.group(0))
-            except Exception:
-                j = None
-    if isinstance(j, dict) and "tool" in j and "args" in j:
-        tool = j["tool"]
-        args = j["args"]
-        if tool == "image-search" and "image_url" not in args:
-            m2 = re.search(r'(https?://[^\s]+?\.(?:png|jpg|jpeg|webp|gif)(?:\?[^\s]*)?)', user_msg, re.I)
-            if m2:
-                args["image_url"] = m2.group(1)
-        return tool, args
-    return "smalltalk", {"message": user_msg}
+        # fallback: naive JSON detection
+        import re
+        m = re.search(r"\{.*\}", raw, re.S)
+        data = json.loads(m.group(0)) if m else {"tool":"recommend","args":{"query":user_msg,"top_k":8}}
+    tool = data.get("tool", "recommend")
+    args = data.get("args", {})
+    if tool == "recommend" and "query" not in args:
+        args["query"] = user_msg
+    if tool == "recommend" and "top_k" not in args:
+        args["top_k"] = 8
+    if tool == "chitchat" and "message" not in args:
+        args["message"] = user_msg
+    return tool, args, "ollama"
 
-def answer_with_llm(question: str, context: str) -> str:
-    sys = "You answer using only the provided context. Be concise. Use bullet points. Do not mention any item not present in the context. If unsure, say what info is missing."
-    usr = f"Question:\n{question}\n\nContext:\n{context}"
-    return _ollama_chat([{"role":"system","content":sys},{"role":"user","content":usr}], temperature=0.2, json_mode=False)
+def respond_with_llm(user_msg: str, context_text: str) -> str:
+    messages = [
+        {"role": "system", "content": ANSWER_SYSTEM},
+        {"role": "user", "content": f"USER: {user_msg}\n\nPRODUCT CONTEXT:\n{context_text}"},
+    ]
+    raw = _ollama_chat(messages)
+    return raw.strip()

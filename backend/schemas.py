@@ -1,35 +1,32 @@
-from pydantic import BaseModel, Field
+
 from typing import List, Optional, Literal
+from pydantic import BaseModel
 
 class Product(BaseModel):
     id: str
     title: str
+    brand: str
     category: str
-    description: str
+    color: Optional[str] = None
     price: float
-    image_url: str
-    brand: Optional[str] = None
-    tags: Optional[List[str]] = None
+    description: str
+    image: str  # URL path like /images/bag1.jpg
 
-class ChatRequest(BaseModel):
-    user_id: str = Field(default="demo")
-    message: str
-
-class ChatResponse(BaseModel):
-    reply: str
-    mode: Literal["local-lite","openai","ollama-agent"]
-    items: Optional[List[Product]] = None
+class CatalogResponse(BaseModel):
+    items: List[Product]
 
 class RecommendRequest(BaseModel):
-    user_id: str = Field(default="demo")
     query: str
     top_k: int = 8
 
 class RecommendResponse(BaseModel):
     items: List[Product]
 
-class ImageSearchResponse(BaseModel):
-    items: List[Product]
+class ChatRequest(BaseModel):
+    user_id: str
+    message: str
 
-class CatalogResponse(BaseModel):
-    items: List[Product]
+class ChatResponse(BaseModel):
+    mode: Literal["agent", "ollama"] = "ollama"
+    message: str
+    items: Optional[List[Product]] = None
