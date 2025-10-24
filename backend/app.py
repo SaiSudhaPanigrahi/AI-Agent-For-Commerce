@@ -39,14 +39,36 @@ agent = Agent(text_index=text_index, vision_index=vision_index)
 def get_catalog():
     return JSONResponse(text_index.catalog)
 
+# @app.post("/api/reindex")
+# def reindex():
+#     global text_index, vision_index, agent
+#     cat = ensure_catalog(DATA_DIR, CACHE_DIR, regenerate=True)
+#     text_index = TextIndex(catalog_path=cat, cache_dir=CACHE_DIR, force_rebuild=True)
+#     vision_index = VisionIndex(catalog_path=cat, cache_dir=CACHE_DIR, data_dir=DATA_DIR, force_rebuild=True)
+#     agent = Agent(text_index=text_index, vision_index=vision_index)
+#     return {"ok": True}
+
+# --- REINDEX: rebuild indexes ONLY, keep your edited catalog.json as-is ---
 @app.post("/api/reindex")
-def reindex():
-    global text_index, vision_index, agent
-    cat = ensure_catalog(DATA_DIR, CACHE_DIR, regenerate=True)
-    text_index = TextIndex(catalog_path=cat, cache_dir=CACHE_DIR, force_rebuild=True)
-    vision_index = VisionIndex(catalog_path=cat, cache_dir=CACHE_DIR, data_dir=DATA_DIR, force_rebuild=True)
-    agent = Agent(text_index=text_index, vision_index=vision_index)
-    return {"ok": True}
+def reindex_only():
+    global text_index, vision_index, catalog_path
+    # Do NOT call ensure_catalog(..., regenerate=True) here.
+    # Just rebuild the indices from whatever is on disk (your manual edits).
+    text_index = TextIndex(catalog_path=catalog_path, cache_dir=CACHE_DIR, force_rebuild=True)
+    vision_index = VisionIndex(catalog_path=catalog_path, cache_dir=CACHE_DIR, data_dir=DATA_DIR, force_rebuild=True)
+    return {"ok": True, "message": "Rebuilt indexes from existing catalog.json (no regeneration)."}
+
+# --- REBUILD CATALOG: optional, will overwrite manual edits from folders ---
+@app.post("/api/rebuild_catalog")
+def rebuild_catalog_and_indexes():
+    global text_index, vision_index, catalog_path
+    # This one regenerates catalog.json from the data/* folders
+    from services.catalog_loader import ensure_catalog
+    catalog_path = ensure_catalog(DATA_DIR, CACHE_DIR, regenerate=True)  # <-- overwrites
+    text_index = TextIndex(catalog_path=catalog_path, cache_dir=CACHE_DIR, force_rebuild=True)
+    vision_index = VisionIndex(catalog_path=catalog_path, cache_dir=CACHE_DIR, data_dir=DATA_DIR, force_rebuild=True)
+    return {"ok": True, "message": "Regenerated catalog.json from folders and rebuilt indexes."}
+
 
 # -------- Flexible text search ----------
 def _pick_first(d: Dict[str, Any], keys: list[str], default=None):
@@ -119,3 +141,15 @@ async def chat(req: Request):
     message = str(body.get("message", "")).strip()
     plan = await agent.chat(message)
     return plan
+
+from services.path_repair import repair_paths
+
+@app.post("/api/repair_paths")
+def repair_paths_route():
+    changed = repair_paths(catalog_path=catalog_path, data_dir=DATA_DIR)
+    # rebuild indices so everything is in sync
+    global text_index, vision_index
+    text_index = TextIndex(catalog_path=catalog_path, cache_dir=CACHE_DIR, force_rebuild=True)
+    vision_index = VisionIndex(catalog_path=catalog_path, cache_dir=CACHE_DIR, data_dir=DATA_DIR, force_rebuild=True)
+    return {"ok": True, "changed": changed}
+

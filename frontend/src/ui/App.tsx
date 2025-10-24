@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react"
 
 type Item = {
-  id: number
+  id: string
   title: string
   category: string
   color: string
@@ -19,7 +19,7 @@ const PANEL_BG = "rgba(20, 28, 60, 0.88)" // containers slightly lighter than BG
 const CARD_BG = "rgba(16, 24, 50, 0.94)"  // cards a touch lighter than panel
 const MUTED = "#A8C3D9"
 
-const styles: Record<string, React.CSSProperties> = {
+const styles: Record<string, React.CSSProperties | any> = {
   page: {
     minHeight: "100%",
     background:
@@ -29,58 +29,38 @@ const styles: Record<string, React.CSSProperties> = {
     color: "white",
     fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto",
   },
-  // --- tweak these constants in your existing App.tsx ---
 
-// 1) give the entire page more top padding
-wrap: {
-  maxWidth: 1240,
-  margin: "0 auto",
-  padding: "48px 28px 112px",   // was "28px 24px 96px"
-  boxSizing: "border-box",
-},
-
-// 2) add more header spacing
-header: {
-  display: "grid",
-  gridTemplateColumns: "auto 1fr auto",
-  alignItems: "center",
-  gap: 20,                      // was 16
-  marginBottom: 14,             // was 6
-},
-
-// 3) make the logo a bit bigger
-logoBox: {
-  width: 64,                    // was 52
-  height: 64,                   // was 52
-  borderRadius: 16,
-  background: "linear-gradient(145deg, #0f1a3a, #0a1027)",
-  boxShadow: "0 8px 24px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.06) inset",
-  display: "grid",
-  placeItems: "center",
-  overflow: "hidden",
-},
-logo: { width: 46, height: 46 }, // was 38
-
-// 4) increase title font + add extra line-height for presence
-title: {
-  fontSize: 48,                 // was 42
-  fontWeight: 900,
-  letterSpacing: 0.3,
-  lineHeight: 1.06,             // a touch taller
-},
-
-// 5) slightly larger tagline and bottom space after header
-tagline: {
-  color: MUTED,
-  marginTop: 10,                // was 6
-  fontSize: 17,                 // was ~15.5
-  maxWidth: 1000,
-},
+  // Layout tweaks
+  wrap: {
+    maxWidth: 1240,
+    margin: "0 auto",
+    padding: "48px 28px 112px",
+    boxSizing: "border-box",
+  },
+  header: {
+    display: "grid",
+    gridTemplateColumns: "auto 1fr auto",
+    alignItems: "center",
+    gap: 20,
+    marginBottom: 14,
+  },
+  logoBox: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    background: "linear-gradient(145deg, #0f1a3a, #0a1027)",
+    boxShadow: "0 8px 24px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.06) inset",
+    display: "grid",
+    placeItems: "center",
+    overflow: "hidden",
+  },
+  logo: { width: 46, height: 46 },
 
   titleBlock: { display: "flex", flexDirection: "column" as const },
-  title: { fontSize: 42, fontWeight: 900, letterSpacing: 0.3, lineHeight: 1.05 },
+  title: { fontSize: 48, fontWeight: 900, letterSpacing: 0.3, lineHeight: 1.06 },
   ai: { color: BLUE, textShadow: `0 0 18px ${BLUE}66` },
-  tagline: { color: MUTED, marginTop: 6, fontSize: 15.5, maxWidth: 900 },
+  tagline: { color: MUTED, marginTop: 10, fontSize: 17, maxWidth: 1000 },
+
   docsBtn: {
     background: "transparent",
     border: `1px solid ${BLUE}`,
@@ -95,7 +75,7 @@ tagline: {
 
   /* --- Panels/Cards --- */
   panel: {
-    background: PANEL_BG,               // lighter than page → readable contrast
+    background: PANEL_BG,
     backdropFilter: "blur(6px)",
     border: "none",
     borderRadius: 18,
@@ -168,7 +148,7 @@ tagline: {
     gap: 18,
   },
   card: {
-    background: CARD_BG,                // lighter than panel for layered depth
+    background: CARD_BG,
     border: "none",
     borderRadius: 16,
     padding: 14,
@@ -211,6 +191,7 @@ const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message }),
     })
+    if (!r.ok) throw new Error("chat failed")
     return r.json()
   },
   textSearch: async (query: string, k = 12) => {
@@ -219,10 +200,12 @@ const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query, k }),
     })
+    if (!r.ok) throw new Error("search failed")
     return r.json()
   },
   catalog: async () => {
     const r = await fetch("/api/catalog")
+    if (!r.ok) throw new Error("catalog failed")
     return r.json()
   },
   imageSearchUpload: async (file: File, k = 12) => {
@@ -230,6 +213,7 @@ const api = {
     fd.append("file", file)
     fd.append("k", String(k))
     const r = await fetch("/api/search_image", { method: "POST", body: fd })
+    if (!r.ok) throw new Error("image upload failed")
     return r.json()
   },
   imageSearchByUrl: async (url: string, k = 12) => {
@@ -238,6 +222,7 @@ const api = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url, k }),
     })
+    if (!r.ok) throw new Error("image url failed")
     return r.json()
   },
 }
@@ -281,6 +266,7 @@ export default function App() {
     setReply("Thinking…")
     setRecs([])
     try {
+      // Image search paths
       if (file) {
         const res = await api.imageSearchUpload(file, 12)
         setReply("Here are visually similar items:")
@@ -293,12 +279,23 @@ export default function App() {
         setRecs(res.results || [])
         return
       }
-      const [recRes, chatRes] = await Promise.all([
-        api.textSearch(query.trim(), 12),
-        api.chat(query.trim()),
-      ])
+
+      // Chat first — use agent results if it recommends; otherwise fallback to plain search
+      const chatRes = await api.chat(query.trim())
       setReply(chatRes.text || chatRes.reply || "")
-      setRecs(recRes.results || [])
+
+      const agentRecommended =
+        chatRes &&
+        typeof chatRes === "object" &&
+        chatRes.intent === "recommend" &&
+        Array.isArray(chatRes.results)
+
+      if (agentRecommended) {
+        setRecs(chatRes.results || [])
+      } else {
+        const recRes = await api.textSearch(query.trim(), 12)
+        setRecs(recRes.results || [])
+      }
     } finally {
       setLoading(false)
     }
@@ -311,8 +308,6 @@ export default function App() {
         <div style={styles.header}>
           <div style={styles.logoBox}>
             <img src="/logo.svg" alt="Mercury logo" style={styles.logo} />
-
-
           </div>
           <div style={styles.titleBlock}>
             <div style={styles.title}>Mercury <span style={styles.ai}>AI</span> Commerce Agent</div>
@@ -321,7 +316,7 @@ export default function App() {
               combines results, and explains them in plain language.
             </div>
           </div>
-          <a href="http://localhost:8000/docs" target="_blank" rel="noreferrer" style={styles.docsBtn as any}>
+          <a href="http://localhost:8000/docs" target="_blank" rel="noreferrer" style={styles.docsBtn}>
             API Docs ↗
           </a>
         </div>

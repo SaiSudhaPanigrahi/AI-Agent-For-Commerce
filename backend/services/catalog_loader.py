@@ -19,12 +19,21 @@ COLOR_NAMES = ["black","white","gray","red","orange","yellow","green","blue","pu
 # Quick filename -> color override
 COLOR_WORDS = set(COLOR_NAMES) - {"assorted"}
 
-def _color_from_filename(name: str) -> str | None:
-    n = re.sub(r"[_\-]+"," ", name.lower())
+# def _color_from_filename(name: str) -> str | None:
+#     n = re.sub(r"[_\-]+"," ", name.lower())
+#     for c in COLOR_WORDS:
+#         if re.search(rf"\b{c}\b", n):
+#             return c
+#     return None
+
+def _color_from_filename(name: str) -> str:
+    # normalize separators _, /, \, -  → space
+    n = re.sub(r"[\\/_-]+", " ", name.lower())
     for c in COLOR_WORDS:
         if re.search(rf"\b{c}\b", n):
             return c
     return None
+
 
 # ---- Robust HSV color detection ----
 def _dominant_color_name(img_path: Path) -> str:

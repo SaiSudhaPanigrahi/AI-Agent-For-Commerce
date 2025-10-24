@@ -1,12 +1,14 @@
 from __future__ import annotations
 import os, asyncio, re
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional, List, Tuple
 
 from agent.gemini_client import get_gemini
 from services.text_index import TextIndex
 from services.vision_search import VisionIndex
 
 AGENT_NAME = os.getenv("AGENT_NAME", "Mercury")
+
+# ---------------- formatting helpers ----------------
 
 def _format_results_text(items: List[Dict[str, Any]], max_n: int = 5) -> str:
     if not items:
@@ -21,34 +23,43 @@ def _format_results_text(items: List[Dict[str, Any]], max_n: int = 5) -> str:
     extra = "" if len(items) <= max_n else f"\n…and {len(items)-max_n} more."
     return "\n".join(lines) + extra
 
-def _extract_prices_from_text(t: str) -> tuple[Optional[float], Optional[float]]:
-    """Strict, tiny fallback so 'under 75' is enforced even if Gemini omits max_price."""
+# ---------------- tiny NL price/category fallback ----------------
+
+_PRICE_BETWEEN = re.compile(r"between\s*\$?(\d+(?:\.\d+)?)\s*(?:and|to)\s*\$?(\d+(?:\.\d+)?)", re.I)
+_PRICE_UNDER   = re.compile(r"(under|less than|below)\s*\$?(\d+(?:\.\d+)?)", re.I)
+_PRICE_OVER    = re.compile(r"(over|more than|above)\s*\$?(\d+(?:\.\d+)?)", re.I)
+
+def _extract_prices_from_text(t: str) -> Tuple[Optional[float], Optional[float]]:
     if not t:
         return (None, None)
-    q = t.lower()
-
-    m = re.search(r"between\s*\$?(\d+)\s*(?:and|to)\s*\$?(\d+)", q)
+    m = _PRICE_BETWEEN.search(t)
     if m:
         a, b = float(m.group(1)), float(m.group(2))
-        lo, hi = (a, b) if a <= b else (b, a)
-        return (lo, hi)
-
-    m = re.search(r"(under|less than|below)\s*\$?(\d+)", q)
+        return (min(a,b), max(a,b))
+    m = _PRICE_UNDER.search(t)
     if m:
         return (None, float(m.group(2)))
-
-    m = re.search(r"(over|more than|above)\s*\$?(\d+)", q)
+    m = _PRICE_OVER.search(t)
     if m:
         return (float(m.group(2)), None)
-
     return (None, None)
+
+def _extract_category_fallback(t: str) -> Optional[str]:
+    s = t.lower()
+    if "cap" in s: return "caps"
+    if "shoe" in s: return "shoes"
+    if "bag" in s: return "bags"
+    if "jacket" in s or "coat" in s: return "jackets"
+    return None
+
+# ---------------- agent ----------------
 
 class Agent:
     """
     Agentic loop using Gemini tool-calling:
     - Gemini extracts q/category/color/min_price/max_price/k and calls search_text.
-    - We still enforce price caps server-side (≤ max) even if Gemini omits them.
-    - Reply includes a readable text list for the chat bubble.
+    - We enforce price caps server-side (≤ max) even if Gemini omits them.
+    - If no results, we clearly say 'Not present' and optionally show the closest alternatives.
     """
     def __init__(self, text_index: TextIndex, vision_index: VisionIndex):
         self.text_index = text_index
@@ -71,7 +82,14 @@ class Agent:
         if nm:
             return {"intent": "chat", "text": nm, "reply": nm, "results": [], "filters": {}}
 
-        # Let Gemini parse & tool-call
+        # Defaults (we’ll update from Gemini/tool call)
+        q = user_text.strip()
+        category = _extract_category_fallback(user_text)  # ensure “caps” is respected even if Gemini misses it
+        color = None
+        min_price, max_price = _extract_prices_from_text(user_text)
+        k = 12
+
+        # Try Gemini tool-calling first
         try:
             self._ensure_model()
             resp = await asyncio.to_thread(
@@ -85,52 +103,65 @@ class Agent:
                     fc = getattr(p, "function_call", None)
                     if fc and fc.name == "search_text":
                         args = fc.args or {}
-                        q = (args.get("q") or user_text or "").strip()
-                        category = args.get("category")
-                        color = args.get("color")
-                        min_price = args.get("min_price")
-                        max_price = args.get("max_price")
-                        k = int(args.get("k") or 8)
-
-                        # STRICT price cap fallback from the natural language if Gemini omitted it
-                        lo_fallback, hi_fallback = _extract_prices_from_text(user_text)
-                        if min_price is None and lo_fallback is not None:
-                            min_price = lo_fallback
-                        if max_price is None and hi_fallback is not None:
-                            max_price = hi_fallback
-
-                        items = self.text_index.search_with_filters(
-                            q, category=category, color=color,
-                            min_price=min_price, max_price=max_price, top_k=k
-                        )
-
-                        # Double-guard: remove any > max_price just in case
-                        if max_price is not None:
-                            items = [it for it in items if float(it.get("price", 0.0)) <= float(max_price)]
-
-                        reply = "Here are some options:\n" + _format_results_text(items)
-                        return {"intent":"recommend","reply":reply,"text":reply,"results":items,
-                                "filters":{"category":category,"color":color}}
-
-            # If Gemini didn’t tool-call, just return its text
-            if resp and resp.text:
-                msg = resp.text.strip()
-                return {"intent":"chat","text":msg,"reply":msg,"results":[],"filters":{}}
-
+                        q = (args.get("q") or q).strip()
+                        # Prefer Gemini’s structured values but keep our strict fallbacks
+                        category = args.get("category") or category
+                        color = args.get("color") or color
+                        if min_price is None and (args.get("min_price") is not None):
+                            min_price = args.get("min_price")
+                        if max_price is None and (args.get("max_price") is not None):
+                            max_price = args.get("max_price")
+                        k = int(args.get("k") or k)
+                        break
         except Exception:
-            # Soft-fail into deterministic RAG if Gemini unavailable
-            pass
+            pass  # fall back to deterministic path
 
-        # Deterministic last resort with strict price extraction too
-        lo_fallback, hi_fallback = _extract_prices_from_text(user_text)
+        # Run search (strict price filters if provided)
         items = self.text_index.search_with_filters(
-            user_text, min_price=lo_fallback, max_price=hi_fallback, top_k=8
+            q, category=category, color=color,
+            min_price=min_price, max_price=max_price, top_k=k
         )
-        if hi_fallback is not None:
-            items = [it for it in items if float(it.get("price", 0.0)) <= float(hi_fallback)]
-        if items:
-            reply = "Here are some options:\n" + _format_results_text(items)
-            return {"intent":"recommend","text":reply,"reply":reply,"results":items,"filters":{}}
 
-        msg = f"Hi! I’m {AGENT_NAME}. Ask for things like “shoes under $75” or “caps for winter under $30”."
-        return {"intent":"chat","text":msg,"reply":msg,"results":[],"filters":{}}
+        # Extra guard: remove any > max_price
+        if max_price is not None:
+            items = [it for it in items if float(it.get("price", 0.0)) <= float(max_price)]
+
+        # If nothing found and a price cap was requested, be vocal and offer closest alternatives
+        if not items and (max_price is not None or "under" in user_text.lower()):
+            # Pull nearest items in the same category (if specified), sorted by price asc
+            pool = [it for it in self.text_index.catalog if (category is None or it.get("category")==category)]
+            pool.sort(key=lambda it: float(it.get("price", 0.0)))
+            # Take a few just above the budget (within +$15 window)
+            near = []
+            if max_price is not None:
+                for it in pool:
+                    p = float(it.get("price", 0.0))
+                    if p > float(max_price) and p <= float(max_price) + 15.0:
+                        near.append(it)
+                        if len(near) >= 5: break
+
+            budget_str = f"${float(max_price):.0f}" if max_price is not None else "your budget"
+            cat_str = f" {category}" if category else ""
+            reply = f"Not present — I don’t have any{cat_str} under {budget_str}."
+            if near:
+                reply += "\nClosest options slightly above your budget:\n" + _format_results_text(near)
+                return {"intent":"recommend","text":reply,"reply":reply,"results":near,"filters":{"category":category,"color":color}}
+            else:
+                return {"intent":"chat","text":reply,"reply":reply,"results":[],"filters":{"category":category,"color":color}}
+
+        # Normal path: we have items
+        if items:
+            # Be explicit if user asked for under-$ and we satisfied it
+            prefix = ""
+            if max_price is not None:
+                prefix = f"Here are {category or 'items'} at or under ${float(max_price):.0f}:\n"
+            elif category:
+                prefix = f"Here are some {category} matches:\n"
+            else:
+                prefix = "Here are some options:\n"
+            reply = prefix + _format_results_text(items)
+            return {"intent":"recommend","text":reply,"reply":reply,"results":items,"filters":{"category":category,"color":color}}
+
+        # No items and no explicit budget — just say so
+        msg = "I couldn’t find matching items."
+        return {"intent":"chat","text":msg,"reply":msg,"results":[],"filters":{"category":category,"color":color}}
