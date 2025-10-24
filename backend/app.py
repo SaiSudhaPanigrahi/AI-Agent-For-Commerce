@@ -1,100 +1,121 @@
-# backend/app.py
-from fastapi import FastAPI, UploadFile, File, Form
+from __future__ import annotations
+from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
 from pathlib import Path
-import os
+from typing import Any, Dict, Optional
+import os, tempfile, json
+
+from dotenv import load_dotenv  # <-- NEW
 
 from services.catalog_loader import ensure_catalog
-from services.embedding_index import EmbeddingIndex
+from services.text_index import TextIndex
 from services.vision_search import VisionIndex
 from agent.agent import Agent
 
-DATA_DIR = Path(__file__).parent / "data"
-CACHE_DIR = Path(__file__).parent / ".cache"
-CACHE_DIR.mkdir(exist_ok=True)
+APP_DIR = Path(__file__).parent
+DATA_DIR = APP_DIR / "data"
+CACHE_DIR = APP_DIR / ".cache"
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="AI Commerce Agent (Gemini + RAG)")
+# Load .env early so child processes see it too
+load_dotenv(dotenv_path=APP_DIR / ".env", override=False)  # <-- NEW
+
+app = FastAPI(title="AI Commerce Agent")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["*"], allow_credentials=True,
+    allow_methods=["*"], allow_headers=["*"]
 )
 
-# serve product images
-app.mount("/data", StaticFiles(directory=DATA_DIR), name="data")
+# Bootstrap
+catalog_path = ensure_catalog(DATA_DIR, CACHE_DIR, regenerate=False)
+text_index = TextIndex(catalog_path=catalog_path, cache_dir=CACHE_DIR, force_rebuild=False)
+vision_index = VisionIndex(catalog_path=catalog_path, cache_dir=CACHE_DIR, data_dir=DATA_DIR, force_rebuild=False)
+agent = Agent(text_index=text_index, vision_index=vision_index)
 
-# ---------- Schemas ----------
-class ChatIn(BaseModel):
-    message: str
-
-class TextSearchIn(BaseModel):
-    query: str
-    k: int = 8
-
-class UrlSearchIn(BaseModel):
-    url: str
-    k: int = 8
-
-# ---------- Bootstrap ----------
-catalog_path = ensure_catalog(DATA_DIR, CACHE_DIR)
-embed_index = EmbeddingIndex(catalog_path=catalog_path, cache_dir=CACHE_DIR)
-vision_index = VisionIndex(catalog_path=catalog_path, cache_dir=CACHE_DIR, data_dir=DATA_DIR)
-agent = Agent(embed_index=embed_index, vision_index=vision_index)
-
-# ---------- Routes ----------
 @app.get("/api/catalog")
 def get_catalog():
-    return JSONResponse(embed_index.catalog)
+    return JSONResponse(text_index.catalog)
 
 @app.post("/api/reindex")
 def reindex():
-    global embed_index, vision_index, agent
-    catalog = ensure_catalog(DATA_DIR, CACHE_DIR, regenerate=True)
-    embed_index = EmbeddingIndex(catalog_path=catalog, cache_dir=CACHE_DIR, force_rebuild=True)
-    vision_index = VisionIndex(catalog_path=catalog, cache_dir=CACHE_DIR, data_dir=DATA_DIR, force_rebuild=True)
-    agent = Agent(embed_index=embed_index, vision_index=vision_index)
+    global text_index, vision_index, agent
+    cat = ensure_catalog(DATA_DIR, CACHE_DIR, regenerate=True)
+    text_index = TextIndex(catalog_path=cat, cache_dir=CACHE_DIR, force_rebuild=True)
+    vision_index = VisionIndex(catalog_path=cat, cache_dir=CACHE_DIR, data_dir=DATA_DIR, force_rebuild=True)
+    agent = Agent(text_index=text_index, vision_index=vision_index)
     return {"ok": True}
 
-@app.post("/api/chat")
-def chat(inp: ChatIn):
-    plan = agent.chat(inp.message.strip())  # dict with intent/filters/results/reply
-    text = plan.get("reply", "")
-    # Keep legacy keys for frontend while returning full plan
-    plan["reply"] = text
-    plan["text"] = text
-    return plan
+# -------- Flexible text search ----------
+def _pick_first(d: Dict[str, Any], keys: list[str], default=None):
+    for k in keys:
+        if k in d and d[k] not in (None, ""):
+            return d[k]
+    return default
+
+def _to_float(x) -> Optional[float]:
+    if x is None: return None
+    try: return float(x)
+    except: return None
+
+def _to_int(x, default: int) -> int:
+    try: return int(x)
+    except: return default
 
 @app.post("/api/search_text")
-def search_text(inp: TextSearchIn):
-    items = embed_index.search(inp.query, top_k=inp.k)
-    return {"results": items}
+async def search_text(req: Request):
+    try:
+        body = await req.json()
+    except Exception:
+        body = {}
 
-# compatibility route for UIs that POST to /api/recommend
-@app.post("/api/recommend")
-def recommend(inp: TextSearchIn):
-    items = embed_index.search(inp.query, top_k=inp.k)
-    return {"results": items}
+    if not isinstance(body, dict):
+        return JSONResponse({"error": "Invalid JSON body"}, status_code=400)
+
+    q = _pick_first(body, ["q", "query", "message", "text", "prompt"], default="")
+    filters = body.get("filters") or {}
+    if not isinstance(filters, dict):
+        filters = {}
+
+    category = body.get("category") or filters.get("category")
+    color = body.get("color") or filters.get("color")
+
+    min_price = _to_float(_pick_first(body, ["min_price", "minPrice", "priceMin"], None))
+    max_price = _to_float(_pick_first(body, ["max_price", "maxPrice", "priceMax"], None))
+    k = _to_int(_pick_first(body, ["k", "topK", "limit"], 12), 12)
+
+    items = text_index.search_with_filters(
+        q, category=category, color=color,
+        min_price=min_price, max_price=max_price, top_k=k
+    )
+    return {"results": items, "filters": {"category": category, "color": color}, "q": q, "k": k}
 
 @app.post("/api/search_image")
 async def search_image(file: UploadFile = File(...), k: int = Form(8)):
-    tmp = CACHE_DIR / ("_upload_" + file.filename.replace("/", "_"))
-    with tmp.open("wb") as f:
+    fd, tmp_path = tempfile.mkstemp(suffix=os.path.splitext(file.filename)[-1] or ".jpg")
+    os.close(fd)
+    with open(tmp_path, "wb") as f:
         f.write(await file.read())
     try:
-        items = vision_index.search_image_path(tmp, top_k=k)
+        items = vision_index.search_image_path(Path(tmp_path), top_k=int(k))
     finally:
-        try:
-            os.remove(tmp)
-        except Exception:
-            pass
+        try: os.remove(tmp_path)
+        except: pass
     return {"results": items}
 
 @app.post("/api/search_by_url")
-def search_by_url(inp: UrlSearchIn):
-    items = vision_index.search_image_url(inp.url, top_k=inp.k)
+async def search_by_url(req: Request):
+    body = await req.json()
+    url = body.get("url")
+    k = int(body.get("k", 8))
+    items = vision_index.search_image_url(url, top_k=k)
     return {"results": items}
+
+@app.post("/api/chat")
+async def chat(req: Request):
+    body = await req.json()
+    message = str(body.get("message", "")).strip()
+    plan = await agent.chat(message)
+    return plan
