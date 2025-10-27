@@ -13,6 +13,11 @@ from services.text_index import TextIndex
 from services.vision_search import VisionIndex
 from agent.agent import Agent
 
+# add this import near the top if not present:
+from fastapi.staticfiles import StaticFiles
+
+
+
 APP_DIR = Path(__file__).parent
 DATA_DIR = APP_DIR / "data"
 CACHE_DIR = APP_DIR / ".cache"
@@ -28,6 +33,14 @@ app.add_middleware(
     allow_origins=["*"], allow_credentials=True,
     allow_methods=["*"], allow_headers=["*"]
 )
+
+# replace your existing mount with this:
+app.mount(
+    "/data",
+    StaticFiles(directory=str(DATA_DIR), html=False, check_dir=True),
+    name="data",
+)
+
 
 # Bootstrap
 catalog_path = ensure_catalog(DATA_DIR, CACHE_DIR, regenerate=False)
