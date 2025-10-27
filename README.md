@@ -103,11 +103,11 @@ ai-commerce-agent-pro/
 ## Demo
 
 ```
-![Landing](frontend/public/assets/ss1.png)
-![LLM small-talk](frontend/public/assets/ss2.png)
-![Text recs](frontend/public/assets/ss3.png)
-![Image search](frontend/public/assets/ss4.png)
-![Image search](frontend/public/assets/ss5.png)
+![Landing](assets/ss1.png)
+![LLM small-talk](assets/ss2.png)
+![Text recs](assets/ss3.png)
+![Image search](assets/ss4.png)
+![Image search](assets/ss5.png)
 
 ```
 
