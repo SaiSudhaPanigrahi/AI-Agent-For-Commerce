@@ -112,6 +112,6 @@ ai-commerce-agent-pro/
 ## Presentation
 
 ```
-Present at: assests/AI_Agent_Mercury_Presentation.pdf
+Present at: assets/AI_Agent_Mercury_Presentation.pdf
 
 ```
