@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react"
+import logo from "./logo.svg";
+
 
 type Item = {
   id: string
@@ -307,7 +309,7 @@ export default function App() {
         {/* Header */}
         <div style={styles.header}>
           <div style={styles.logoBox}>
-            <img src="/logo.svg" alt="Mercury logo" style={styles.logo} />
+            <img src={logo} alt="Mercury logo" style={styles.logo} />
           </div>
           <div style={styles.titleBlock}>
             <div style={styles.title}>Mercury <span style={styles.ai}>AI</span> Commerce Agent</div>
