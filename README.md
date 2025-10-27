@@ -102,14 +102,12 @@ ai-commerce-agent-pro/
 
 ## Demo
 
-```
 ![Landing](assets/ss1.png)
 ![LLM small-talk](assets/ss2.png)
 ![Text recs](assets/ss3.png)
 ![Image search](assets/ss4.png)
 ![Image search](assets/ss5.png)
 
-```
 
 ## Presentation
 
