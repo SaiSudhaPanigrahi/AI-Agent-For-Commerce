@@ -1,32 +1,100 @@
+from __future__ import annotations
 
-from typing import List, Optional, Literal
-from pydantic import BaseModel
+from typing import Any, Dict, List, Optional
 
-class Product(BaseModel):
+from pydantic import AliasChoices, AnyHttpUrl, BaseModel, ConfigDict, Field
+
+
+class CatalogItem(BaseModel):
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
+
     id: str
     title: str
-    brand: str
     category: str
     color: Optional[str] = None
     price: float
     description: str
-    image: str  # URL path like /images/bag1.jpg
+    image_path: str = Field(
+        validation_alias=AliasChoices("image_path", "image"),
+        serialization_alias="image_path",
+    )
+    tags: List[str] = Field(default_factory=list)
+    score: Optional[float] = None
 
-class CatalogResponse(BaseModel):
-    items: List[Product]
 
-class RecommendRequest(BaseModel):
-    query: str
-    top_k: int = 8
+class SearchFilters(BaseModel):
+    model_config = ConfigDict(extra="ignore")
 
-class RecommendResponse(BaseModel):
-    items: List[Product]
+    category: Optional[str] = None
+    color: Optional[str] = None
+
+
+class SearchTextRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    q: str = Field(
+        default="",
+        validation_alias=AliasChoices("q", "query", "message", "text", "prompt"),
+    )
+    filters: SearchFilters = Field(default_factory=SearchFilters)
+    category: Optional[str] = None
+    color: Optional[str] = None
+    min_price: Optional[float] = Field(
+        default=None,
+        validation_alias=AliasChoices("min_price", "minPrice", "priceMin"),
+    )
+    max_price: Optional[float] = Field(
+        default=None,
+        validation_alias=AliasChoices("max_price", "maxPrice", "priceMax"),
+    )
+    k: int = Field(default=12, ge=1, le=50, validation_alias=AliasChoices("k", "topK", "limit"))
+
+
+class SearchTextResponse(BaseModel):
+    results: List[CatalogItem]
+    filters: SearchFilters
+    q: str
+    k: int
+
+
+class SearchByUrlRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    url: AnyHttpUrl
+    k: int = Field(default=8, ge=1, le=50)
+
 
 class ChatRequest(BaseModel):
-    user_id: str
-    message: str
+    model_config = ConfigDict(extra="ignore")
+
+    message: str = Field(min_length=1, max_length=2000)
+
 
 class ChatResponse(BaseModel):
-    mode: Literal["agent", "ollama"] = "ollama"
+    model_config = ConfigDict(extra="allow")
+
+    intent: str
+    source: Optional[str] = None
+    text: str
+    reply: str
+    results: List[CatalogItem] = Field(default_factory=list)
+    filters: Dict[str, Optional[str]] = Field(default_factory=dict)
+
+
+class SearchResultsResponse(BaseModel):
+    results: List[CatalogItem]
+
+
+class OperationResponse(BaseModel):
+    ok: bool
     message: str
-    items: Optional[List[Product]] = None
+
+
+class RepairPathsResponse(BaseModel):
+    ok: bool
+    changed: int
+
+
+class ErrorResponse(BaseModel):
+    error: str
+    detail: Any = None

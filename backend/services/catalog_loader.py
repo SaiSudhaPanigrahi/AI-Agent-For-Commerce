@@ -14,7 +14,8 @@ CAT_MAP = {
 }
 
 # Canonical color names
-COLOR_NAMES = ["black","white","gray","red","orange","yellow","green","blue","purple","brown","assorted"]
+COLOR_NAMES = ["black","white","gray","red","orange","yellow","green","blue","purple","pink","brown","assorted"]
+COLOR_ALIASES = {"grey": "gray"}
 
 # Quick filename -> color override
 COLOR_WORDS = set(COLOR_NAMES) - {"assorted"}
@@ -26,9 +27,11 @@ COLOR_WORDS = set(COLOR_NAMES) - {"assorted"}
 #             return c
 #     return None
 
-def _color_from_filename(name: str) -> str:
+def _color_from_filename(name: str) -> str | None:
     # normalize separators _, /, \, -  → space
     n = re.sub(r"[\\/_-]+", " ", name.lower())
+    for alias, canonical in COLOR_ALIASES.items():
+        n = re.sub(rf"\b{alias}\b", canonical, n)
     for c in COLOR_WORDS:
         if re.search(rf"\b{c}\b", n):
             return c

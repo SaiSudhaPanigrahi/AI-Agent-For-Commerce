@@ -14,12 +14,14 @@ except Exception:
 if not USE_ST:
     from sklearn.feature_extraction.text import TfidfVectorizer  # type: ignore
 
-COLOR_SET = set(["red","blue","green","black","white","yellow","brown","gray","purple","orange","assorted"])
+COLOR_SET = set(["red","blue","green","black","white","yellow","brown","gray","purple","pink","orange","assorted"])
+COLOR_ALIASES = {"grey": "gray"}
 CAT_SET = set(["bags","shoes","jackets","caps"])
 
 def _norm_color(s: Optional[str]) -> Optional[str]:
     if not s: return None
     s = s.strip().lower()
+    s = COLOR_ALIASES.get(s, s)
     return s if s in COLOR_SET else None
 
 def _norm_cat(s: Optional[str]) -> Optional[str]:

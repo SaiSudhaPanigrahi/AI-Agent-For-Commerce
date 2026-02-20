@@ -115,3 +115,78 @@ ai-commerce-agent-pro/
 Present at: assets/AI_Agent_Mercury_Presentation.pdf
 
 ```
+
+---
+
+## Interview Demo Script (5-7 min)
+
+Use this sequence during your screen-share:
+
+1. Open UI and describe the three capabilities: chat, text recommendations, image search.
+2. Run a text query with constraints:
+   - Example: "show me pink shoes under 90"
+3. Run a chat-style query:
+   - Example: "what can you do?"
+4. Run image search by URL or upload.
+5. Open Swagger docs and show typed API contracts and response models.
+6. Mention reliability work:
+   - request validation
+   - standardized JSON errors
+   - request latency logging
+   - API tests with `FastAPI TestClient`
+
+---
+
+## Interview Talking Points
+
+- **Problem**: unify chat + search + visual retrieval in one practical agent.
+- **Architecture choice**: keep services modular but expose one coherent API.
+- **Hard bug solved**: stale/incorrect colors from metadata drift; fixed by treating file names in `backend/data` as source truth.
+- **Quality improvements**: typed schemas, explicit validation, deterministic tests, Dockerized run path.
+- **Tradeoff awareness**: in-memory indexes are great for small catalogs, but vector DB is better at larger scale.
+
+---
+
+## Quick Commands (Interview Friendly)
+
+```bash
+# Run full stack
+make up
+
+# Stop stack
+make down
+
+# Tail logs
+make logs
+
+# Rebuild catalog + indices via API
+make reindex
+
+# Run backend API tests
+make test-backend
+```
+
+---
+
+## Additional Project Docs
+
+- Architecture details: `ARCHITECTURE.md`
+- Contribution workflow: `CONTRIBUTING.md`
+- Backend tests: `backend/tests/README.md`
+
+---
+
+## Known Limitations
+
+- Catalog/index rebuild is synchronous and may be slower on larger datasets.
+- Retrieval quality is tuned for a compact demo catalog, not yet benchmarked at scale.
+- No persistence for user sessions/personalization yet.
+
+---
+
+## Roadmap
+
+- Add retrieval evaluation metrics (precision@k, recall@k on labeled queries)
+- Add vector DB backend (`pgvector` or `Qdrant`)
+- Add structured observability dashboards (latency/error/search quality)
+- Add personalization/session memory and explainable ranking

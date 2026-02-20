@@ -33,7 +33,8 @@ if HAS_TORCH and not HAS_OPENCLIP:
 import colorsys
 
 NEUTRAL_FIRST = True
-COLOR_NAMES = ["black","white","gray","red","orange","yellow","green","blue","purple","brown","assorted"]
+COLOR_NAMES = ["black","white","gray","red","orange","yellow","green","blue","purple","pink","brown","assorted"]
+COLOR_ALIASES = {"grey": "gray"}
 COLOR_WORDS = set(COLOR_NAMES) - {"assorted"}
 
 # def _color_from_filename(name: str) -> Optional[str]:
@@ -46,6 +47,8 @@ COLOR_WORDS = set(COLOR_NAMES) - {"assorted"}
 def _color_from_filename(name: str) -> Optional[str]:
     # normalize separators _, /, \, -  → space
     n = re.sub(r"[\\/_-]+", " ", name.lower())
+    for alias, canonical in COLOR_ALIASES.items():
+        n = re.sub(rf"\b{alias}\b", canonical, n)
     for c in COLOR_WORDS:
         if re.search(rf"\b{c}\b", n):
             return c
