@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mercury Catalog Browser</title>
+    <style>
+      :root {
+        --bg: #091128;
+        --panel: rgba(18, 26, 56, 0.92);
+        --card: rgba(15, 23, 50, 0.96);
+        --line: rgba(255, 255, 255, 0.1);
+        --text: #eaf4ff;
+        --muted: #a8c3d9;
+        --accent: #19e3ff;
+        --accent2: #19ffd2;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background:
+          radial-gradient(980px 460px at 10% -10%, rgba(25, 227, 255, 0.18), transparent 60%),
+          radial-gradient(780px 420px at 90% -12%, rgba(25, 255, 210, 0.12), transparent 60%),
+          linear-gradient(180deg, var(--bg), #060d21);
+      }
+      .wrap {
+        max-width: 1360px;
+        margin: 0 auto;
+        padding: 28px 22px 60px;
+      }
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 34px;
+        letter-spacing: 0.2px;
+      }
+      .sub {
+        color: var(--muted);
+        margin-top: 6px;
+        font-size: 14px;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 36px;
+        padding: 0 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(25, 227, 255, 0.5);
+        color: var(--accent);
+        background: transparent;
+        text-decoration: none;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .panel {
+        margin-top: 16px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+        padding: 14px;
+      }
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+        align-items: end;
+      }
+      label {
+        display: block;
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
+      input[type="text"], select {
+        width: 100%;
+        height: 42px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        color: var(--text);
+        background: rgba(10, 18, 42, 0.8);
+        padding: 0 12px;
+      }
+      .rangeWrap {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 8px 10px;
+        background: rgba(10, 18, 42, 0.72);
+      }
+      input[type="range"] { width: 100%; }
+      .count {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 8px;
+      }
+      .grid {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 14px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .img {
+        height: 200px;
+        border-radius: 10px;
+        background: #0a1127;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .img img {
+        max-width: 100%;
+        max-height: 100%;
+      }
+      .title {
+        margin-top: 10px;
+        font-weight: 900;
+        font-size: 16px;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 4px;
+      }
+      .price {
+        color: var(--accent2);
+        font-size: 17px;
+        font-weight: 900;
+        margin-top: 5px;
+      }
+      .desc {
+        color: #bdd1e3;
+        font-size: 13px;
+        margin-top: 5px;
+        line-height: 1.35;
+      }
+      .row {
+        margin-top: 8px;
+        display: flex;
+        gap: 8px;
+      }
+      .empty {
+        color: var(--muted);
+        text-align: center;
+        padding: 24px 12px;
+      }
+      @media (max-width: 720px) {
+        .top {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        h1 { font-size: 26px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="top">
+        <div>
+          <h1>Mercury Catalog Browser</h1>
+          <div class="sub">Controls and full-catalog browsing window.</div>
+        </div>
+        <div class="actions">
+          <a class="btn" href="/">Back to Main App</a>
+          <a class="btn" href="/compare.html" target="_blank" rel="noreferrer">Open Compare</a>
+          <button class="btn" id="openCompareBtn">Open Compare Window</button>
+          <button class="btn" id="clearCompareBtn">Clear Compare</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="controls">
+          <div>
+            <label for="searchInput">Search title/description</label>
+            <input id="searchInput" type="text" placeholder="e.g. pink shoe" />
+          </div>
+          <div>
+            <label for="categorySelect">Category</label>
+            <select id="categorySelect">
+              <option value="all">All</option>
+            </select>
+          </div>
+          <div>
+            <label for="sortSelect">Sort</label>
+            <select id="sortSelect">
+              <option value="title">Title A-Z</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="score_desc">Score: High to Low</option>
+            </select>
+          </div>
+          <div class="rangeWrap">
+            <label id="budgetLabel" for="minRange">Budget range</label>
+            <input id="minRange" type="range" min="0" max="500" value="0" />
+            <input id="maxRange" type="range" min="0" max="500" value="500" />
+          </div>
+        </div>
+        <div class="count" id="countText">Loading catalog...</div>
+      </div>
+
+      <div class="panel">
+        <div class="grid" id="grid"></div>
+      </div>
+    </div>
+
+    <script>
+      const COMPARE_ITEMS_KEY = "mercury_compare_items_v1";
+
+      const state = {
+        catalog: [],
+        filtered: [],
+        compareItems: [],
+        minBound: 0,
+        maxBound: 500,
+      };
+
+      const q = (id) => document.getElementById(id);
+      const byClass = (cls) => document.querySelector(cls);
+      const escapeHtml = (value) =>
+        String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+
+      function getCompareItems() {
+        try {
+          const raw = localStorage.getItem(COMPARE_ITEMS_KEY);
+          if (!raw) return [];
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (_) {
+          return [];
+        }
+      }
+
+      function saveCompareItems(items) {
+        localStorage.setItem(COMPARE_ITEMS_KEY, JSON.stringify(items.slice(0, 3)));
+      }
+
+      function inCompare(item) {
+        return state.compareItems.some((x) => x.id === item.id);
+      }
+
+      function toggleCompare(item) {
+        if (inCompare(item)) {
+          state.compareItems = state.compareItems.filter((x) => x.id !== item.id);
+        } else if (state.compareItems.length < 3) {
+          state.compareItems = [...state.compareItems, item];
+        }
+        saveCompareItems(state.compareItems);
+        render();
+      }
+
+      function openCompareWindow() {
+        if (!state.compareItems.length) {
+          alert("Add at least one item to compare.");
+          return;
+        }
+        saveCompareItems(state.compareItems);
+        const popup = window.open(
+          "/compare.html",
+          "mercury-compare-window",
+          "width=1100,height=760,resizable=yes,scrollbars=yes",
+        );
+        if (popup) {
+          popup.postMessage({ type: "MERCURY_COMPARE_ITEMS", payload: state.compareItems }, window.location.origin);
+        }
+      }
+
+      function setRangeBounds(min, max) {
+        state.minBound = Math.floor(min);
+        state.maxBound = Math.ceil(max);
+        q("minRange").min = String(state.minBound);
+        q("maxRange").min = String(state.minBound);
+        q("minRange").max = String(state.maxBound);
+        q("maxRange").max = String(state.maxBound);
+        q("minRange").value = String(state.minBound);
+        q("maxRange").value = String(state.maxBound);
+      }
+
+      function getFilters() {
+        let min = Number(q("minRange").value);
+        let max = Number(q("maxRange").value);
+        if (min > max) {
+          const t = min;
+          min = max;
+          max = t;
+        }
+        return {
+          search: q("searchInput").value.trim().toLowerCase(),
+          category: q("categorySelect").value,
+          sort: q("sortSelect").value,
+          min,
+          max,
+        };
+      }
+
+      function applyFilters() {
+        const { search, category, sort, min, max } = getFilters();
+        q("budgetLabel").textContent = `Budget range: $${min} - $${max}`;
+
+        let items = state.catalog.filter((it) => {
+          if (category !== "all" && it.category !== category) return false;
+          if (Number(it.price) < min || Number(it.price) > max) return false;
+          if (!search) return true;
+          const hay = `${it.title || ""} ${it.description || ""}`.toLowerCase();
+          return hay.includes(search);
+        });
+
+        if (sort === "title") items.sort((a, b) => String(a.title).localeCompare(String(b.title)));
+        if (sort === "price_asc") items.sort((a, b) => Number(a.price) - Number(b.price));
+        if (sort === "price_desc") items.sort((a, b) => Number(b.price) - Number(a.price));
+        if (sort === "score_desc") items.sort((a, b) => (Number(b.score) || -999) - (Number(a.score) || -999));
+
+        state.filtered = items;
+      }
+
+      function render() {
+        applyFilters();
+        const grid = q("grid");
+        const count = q("countText");
+        count.textContent = `${state.filtered.length} of ${state.catalog.length} items • compare selected: ${state.compareItems.length}/3`;
+
+        if (!state.filtered.length) {
+          grid.innerHTML = `<div class="empty">No items match these filters.</div>`;
+          return;
+        }
+
+        grid.innerHTML = state.filtered
+          .map((it) => {
+            const compared = inCompare(it);
+            return `
+              <div class="card">
+                <div class="img">
+                  <img src="/data/${escapeHtml(it.image_path || "")}" alt="${escapeHtml(it.title || "Item")}" />
+                </div>
+                <div class="title">${escapeHtml(it.title || "Untitled item")}</div>
+                <div class="meta">${escapeHtml(it.category || "n/a")} • ${escapeHtml(it.color || "n/a")}</div>
+                <div class="price">$${Number(it.price || 0).toFixed(2)}</div>
+                <div class="desc">${escapeHtml(it.description || "")}</div>
+                <div class="row">
+                  <button class="btn" data-toggle-id="${escapeHtml(it.id || "")}">${compared ? "Remove Compare" : "Add Compare"}</button>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+        grid.querySelectorAll("[data-toggle-id]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-toggle-id");
+            const found = state.catalog.find((x) => String(x.id) === String(id));
+            if (found) toggleCompare(found);
+          });
+        });
+      }
+
+      function initCategoryOptions(items) {
+        const select = q("categorySelect");
+        const counts = new Map();
+        items.forEach((it) => counts.set(it.category, (counts.get(it.category) || 0) + 1));
+        [...counts.entries()]
+          .sort((a, b) => String(a[0]).localeCompare(String(b[0])))
+          .forEach(([cat, count]) => {
+            const opt = document.createElement("option");
+            opt.value = cat;
+            opt.textContent = `${cat} (${count})`;
+            select.appendChild(opt);
+          });
+      }
+
+      async function loadCatalog() {
+        const resp = await fetch("/api/catalog");
+        if (!resp.ok) throw new Error("catalog load failed");
+        const items = await resp.json();
+        state.catalog = Array.isArray(items) ? items : [];
+        state.compareItems = getCompareItems();
+        initCategoryOptions(state.catalog);
+
+        if (state.catalog.length) {
+          const prices = state.catalog.map((it) => Number(it.price || 0));
+          setRangeBounds(Math.min(...prices), Math.max(...prices));
+        }
+        render();
+      }
+
+      ["searchInput", "categorySelect", "sortSelect", "minRange", "maxRange"].forEach((id) => {
+        q(id).addEventListener("input", render);
+        q(id).addEventListener("change", render);
+      });
+
+      q("openCompareBtn").addEventListener("click", openCompareWindow);
+      q("clearCompareBtn").addEventListener("click", () => {
+        state.compareItems = [];
+        saveCompareItems([]);
+        render();
+      });
+
+      loadCatalog().catch((err) => {
+        q("countText").textContent = "Failed to load catalog. Ensure backend is running.";
+        q("grid").innerHTML = `<div class="empty">${escapeHtml(err.message || "Unknown error")}</div>`;
+      });
+    </script>
+  </body>
+</html>
