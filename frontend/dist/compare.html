@@ -43,6 +43,10 @@
         font-size: 32px;
         letter-spacing: 0.2px;
       }
+      .ai {
+        color: var(--accent);
+        text-shadow: 0 0 14px rgba(25, 227, 255, 0.45);
+      }
       .muted { color: var(--muted); font-size: 14px; margin-top: 6px; }
       .actions { display: flex; gap: 8px; flex-wrap: wrap; }
       button {
@@ -74,6 +78,21 @@
         border-radius: 12px;
         padding: 12px;
       }
+      .thumb {
+        height: 185px;
+        border-radius: 10px;
+        background: #0a1127;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+      }
+      .thumb img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+      }
       .title { font-size: 16px; font-weight: 900; }
       .meta { font-size: 13px; color: var(--muted); margin-top: 4px; }
       .row {
@@ -84,6 +103,24 @@
         margin-top: 7px;
       }
       .price { color: var(--accent2); font-weight: 800; }
+      .rec-list {
+        margin: 0;
+        padding-left: 18px;
+      }
+      .rec-list li {
+        margin-top: 6px;
+        color: #d7ebfb;
+        line-height: 1.35;
+      }
+      .tag {
+        display: inline-block;
+        margin-top: 7px;
+        font-size: 11px;
+        color: var(--accent);
+        border: 1px solid rgba(25, 227, 255, 0.4);
+        border-radius: 999px;
+        padding: 3px 8px;
+      }
       table {
         width: 100%;
         border-collapse: collapse;
@@ -112,7 +149,7 @@
     <div class="wrap">
       <div class="top">
         <div>
-          <h1>Mercury Product Compare</h1>
+          <h1>Mercury <span class="ai">AI</span> Product Compare</h1>
           <div class="muted">Separate comparison window for selected catalog items.</div>
         </div>
         <div class="actions">
@@ -127,6 +164,7 @@
 
     <script>
       const STORAGE_KEY = "mercury_compare_items_v1";
+      const state = { aiRequestSeq: 0 };
 
       const byId = (id) => document.getElementById(id);
       const escapeHtml = (value) =>
@@ -158,6 +196,86 @@
         return `$${n.toFixed(2)}`;
       }
 
+      function buildImageSrc(item) {
+        const raw = String(item.image_path || item.image || "").trim();
+        if (!raw) return "";
+        if (/^https?:\/\//i.test(raw)) return raw;
+        if (raw.startsWith("/data/")) return raw;
+        if (raw.startsWith("data/")) return `/${raw}`;
+        if (raw.startsWith("/")) return raw;
+        return `/data/${raw}`;
+      }
+
+      async function fetchCompareAdvice(items) {
+        const compareItems = (items || []).map((it) => ({
+          id: it.id,
+          title: it.title,
+          category: it.category,
+          color: it.color,
+          price: Number(it.price),
+          description: it.description,
+          image_path: it.image_path,
+        }));
+        const res = await fetch("/api/compare_advice", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: compareItems,
+            user_goal: "Best overall value for purchase decision",
+            require_ai: false,
+          }),
+        });
+        if (!res.ok) {
+          const payload = await res.json().catch(() => ({}));
+          throw new Error(payload.detail || "AI compare unavailable");
+        }
+        return res.json();
+      }
+
+      function renderAdvicePanel(advice) {
+        const sourceEl = byId("aiSource");
+        const summaryEl = byId("aiSummary");
+        const listEl = byId("aiList");
+        if (!sourceEl || !summaryEl || !listEl) return;
+
+        const source = advice && advice.source === "heuristic" ? "heuristic fallback" : "Gemini";
+        sourceEl.textContent = `AI Source: ${source}`;
+        summaryEl.textContent = advice.summary || "Recommendation generated.";
+        const bullets =
+          Array.isArray(advice.bullets) && advice.bullets.length
+            ? advice.bullets
+            : ["No additional recommendation notes returned."];
+        listEl.innerHTML = bullets.map((line) => `<li>${escapeHtml(line)}</li>`).join("");
+      }
+
+      function renderAdviceError(message) {
+        const sourceEl = byId("aiSource");
+        const summaryEl = byId("aiSummary");
+        const listEl = byId("aiList");
+        if (!sourceEl || !summaryEl || !listEl) return;
+        sourceEl.textContent = "AI Source: unavailable";
+        summaryEl.textContent = message || "AI compare is currently unavailable.";
+        listEl.innerHTML = "<li>Check backend availability. If Gemini is unavailable, heuristic fallback should be returned automatically.</li>";
+      }
+
+      async function updateAdvice(items, seq) {
+        const sourceEl = byId("aiSource");
+        const summaryEl = byId("aiSummary");
+        const listEl = byId("aiList");
+        if (sourceEl) sourceEl.textContent = "AI Source: analyzing...";
+        if (summaryEl) summaryEl.textContent = "Analyzing compared products...";
+        if (listEl) listEl.innerHTML = "";
+
+        try {
+          const advice = await fetchCompareAdvice(items);
+          if (seq !== state.aiRequestSeq) return;
+          renderAdvicePanel(advice);
+        } catch (err) {
+          if (seq !== state.aiRequestSeq) return;
+          renderAdviceError(err instanceof Error ? err.message : "AI compare is currently unavailable.");
+        }
+      }
+
       function render() {
         const items = getItems().slice(0, 3);
         const content = byId("content");
@@ -174,11 +292,19 @@
           .map(
             (it) => `
               <div class="card">
+                <div class="thumb">
+                  <img
+                    src="${escapeHtml(buildImageSrc(it))}"
+                    alt="${escapeHtml(it.title || "Product image")}"
+                    loading="lazy"
+                    onerror="this.onerror=null;this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22600%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%230a1127%22/><text x=%2250%25%22 y=%2250%25%22 fill=%22%23b8d4e8%22 font-size=%2232%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22>Image unavailable</text></svg>';"
+                  />
+                </div>
                 <div class="title">${escapeHtml(it.title || "Untitled item")}</div>
                 <div class="meta">${escapeHtml(it.category || "n/a")} • ${escapeHtml(it.color || "n/a")}</div>
                 <div class="row"><span>Price</span><span class="price">${formatPrice(it.price)}</span></div>
-                <div class="row"><span>Score</span><span>${it.score != null ? Number(it.score).toFixed(3) : "n/a"}</span></div>
                 <div class="row"><span>Description</span><span style="max-width:70%; text-align:right;">${escapeHtml(it.description || "n/a")}</span></div>
+                <div class="tag">AI comparison ready</div>
               </div>
             `,
           )
@@ -189,8 +315,6 @@
           ["Category", ...items.map((i) => escapeHtml(i.category || "n/a"))],
           ["Color", ...items.map((i) => escapeHtml(i.color || "n/a"))],
           ["Price", ...items.map((i) => formatPrice(i.price))],
-          ["Score", ...items.map((i) => (i.score != null ? Number(i.score).toFixed(3) : "n/a"))],
-          ["Image Path", ...items.map((i) => escapeHtml(i.image_path || "n/a"))],
         ];
 
         const headers = items
@@ -210,6 +334,12 @@
 
         content.innerHTML = `
           <div class="panel">
+            <div class="title">AI Recommendation</div>
+            <div id="aiSource" class="tag">AI Source: analyzing...</div>
+            <div id="aiSummary" style="margin-top:8px; color:#e7f5ff; font-weight:700;">Analyzing compared products...</div>
+            <ul id="aiList" class="rec-list"></ul>
+          </div>
+          <div class="panel">
             <div class="grid">${cards}</div>
           </div>
           <div class="panel">
@@ -224,6 +354,9 @@
             </table>
           </div>
         `;
+
+        state.aiRequestSeq += 1;
+        void updateAdvice(items, state.aiRequestSeq);
       }
 
       byId("refreshBtn").addEventListener("click", render);

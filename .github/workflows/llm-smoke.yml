@@ -1,0 +1,121 @@
+name: LLM Smoke (Manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  llm-compare-smoke:
+    name: Compare LLM Smoke Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            backend/requirements.txt
+            backend/requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Detect secret availability
+        id: secret_check
+        run: |
+          if [ -n "${{ secrets.GOOGLE_API_KEY }}" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skip smoke test (secret missing)
+        if: steps.secret_check.outputs.available != 'true'
+        run: echo "GOOGLE_API_KEY is not configured in repository secrets. Skipping LLM smoke test."
+
+      - name: Write backend env from GitHub Secret
+        if: steps.secret_check.outputs.available == 'true'
+        run: |
+          cat > .env <<EOF
+          GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }}
+          EOF
+
+      - name: Start backend
+        if: steps.secret_check.outputs.available == 'true'
+        run: |
+          nohup python -m uvicorn app:app --host 127.0.0.1 --port 8000 > /tmp/backend.log 2>&1 &
+          echo $! > /tmp/backend.pid
+
+      - name: Wait for backend
+        if: steps.secret_check.outputs.available == 'true'
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8000/healthz >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Backend did not start in time"
+          exit 1
+
+      - name: Verify compare endpoint uses LLM
+        if: steps.secret_check.outputs.available == 'true'
+        run: |
+          python - <<'PY'
+          import json
+          import urllib.request
+
+          payload = {
+            "items": [
+              {
+                "id": "item-1",
+                "title": "Brown Everyday Tote",
+                "category": "bags",
+                "color": "brown",
+                "price": 59.0,
+                "description": "Daily tote bag",
+              },
+              {
+                "id": "item-2",
+                "title": "Blue Travel Bag",
+                "category": "bags",
+                "color": "blue",
+                "price": 74.0,
+                "description": "Travel-ready bag",
+              },
+            ],
+            "user_goal": "Best overall value",
+            "require_ai": True,
+          }
+          req = urllib.request.Request(
+            "http://127.0.0.1:8000/api/compare_advice",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+          )
+          try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+              body = json.loads(resp.read().decode("utf-8"))
+          except urllib.error.HTTPError as e:
+            msg = e.read().decode("utf-8", errors="replace")
+            raise SystemExit(f"LLM smoke failed with HTTP {e.code}: {msg}")
+
+          if body.get("source") != "llm":
+            raise SystemExit(f"Expected source=llm, got: {body}")
+          print("LLM smoke passed")
+          PY
+
+      - name: Print backend logs on failure
+        if: failure() && steps.secret_check.outputs.available == 'true'
+        run: tail -n 200 /tmp/backend.log || true

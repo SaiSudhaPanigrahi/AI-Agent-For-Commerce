@@ -1,0 +1,56 @@
+[
+  {
+    "name": "pink-shoes",
+    "query": "show me pink shoes",
+    "expected_categories": ["shoes"]
+  },
+  {
+    "name": "black-jackets",
+    "query": "find black jackets for winter",
+    "expected_categories": ["jackets"]
+  },
+  {
+    "name": "blue-caps",
+    "query": "blue cap",
+    "expected_categories": ["caps"]
+  },
+  {
+    "name": "brown-bags",
+    "query": "brown everyday tote bag",
+    "expected_categories": ["bags"]
+  },
+  {
+    "name": "budget-caps",
+    "query": "caps under 30",
+    "filters": {
+      "category": "caps",
+      "max_price": 30
+    },
+    "expected_categories": ["caps"]
+  },
+  {
+    "name": "travel-bag",
+    "query": "travel duffel for weekend",
+    "expected_categories": ["bags"]
+  },
+  {
+    "name": "running-shoes",
+    "query": "running shoes with grip",
+    "expected_categories": ["shoes"]
+  },
+  {
+    "name": "green-jacket",
+    "query": "green jacket",
+    "expected_categories": ["jackets"]
+  },
+  {
+    "name": "white-cap",
+    "query": "white cap",
+    "expected_categories": ["caps"]
+  },
+  {
+    "name": "compact-city-bag",
+    "query": "compact crossbody bag for city",
+    "expected_categories": ["bags"]
+  }
+]

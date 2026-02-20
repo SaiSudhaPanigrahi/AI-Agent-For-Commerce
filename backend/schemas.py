@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import AliasChoices, AnyHttpUrl, BaseModel, ConfigDict, Field
 
@@ -98,3 +98,37 @@ class RepairPathsResponse(BaseModel):
 class ErrorResponse(BaseModel):
     error: str
     detail: Any = None
+
+
+class HealthResponse(BaseModel):
+    status: Literal["ok", "degraded"]
+    service: str
+    details: Dict[str, Any] = Field(default_factory=dict)
+
+
+class CompareAdviceItem(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    id: str
+    title: str
+    category: str
+    color: Optional[str] = None
+    price: float
+    description: str
+    score: Optional[float] = None
+    image_path: Optional[str] = None
+
+
+class CompareAdviceRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    items: List[CompareAdviceItem] = Field(min_length=1, max_length=3)
+    user_goal: Optional[str] = Field(default="Best overall value")
+    require_ai: bool = False
+
+
+class CompareAdviceResponse(BaseModel):
+    summary: str
+    bullets: List[str] = Field(default_factory=list)
+    recommended_item_id: Optional[str] = None
+    source: Literal["llm", "heuristic"] = "heuristic"

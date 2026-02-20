@@ -35,6 +35,15 @@ export GOOGLE_API_KEY=...
 export OPENAI_API_KEY=...
 ```
 
+**Preferred local setup (persist key without committing):**
+```bash
+cd backend
+cp .env.example .env
+# edit backend/.env and set GOOGLE_API_KEY=...
+# optional model override if your key does not have access to the default:
+# GEMINI_MODEL=gemini-2.5-flash
+```
+
 ### Frontend (Vite + React + Tailwind)
 
 ```bash
@@ -43,6 +52,14 @@ cp .env.example .env                  # ensure VITE_API_BASE=http://localhost:80
 npm install
 npm run dev                           # UI → http://localhost:5173
 ```
+
+### Secrets Management (Interview Ready)
+
+- **Local dev:** keep real secrets in `backend/.env` (already gitignored).
+- **Repository-safe template:** `backend/.env.example` contains only placeholder keys.
+- **CI secret injection:** add `GOOGLE_API_KEY` in GitHub repo settings:
+  `Settings -> Secrets and variables -> Actions -> New repository secret`
+- **Smoke validation:** run workflow `LLM Smoke (Manual)` from Actions tab to verify `/api/compare_advice` returns LLM output using the GitHub secret.
 
 ---
 
@@ -173,6 +190,7 @@ make test-backend
 - Architecture details: `ARCHITECTURE.md`
 - Contribution workflow: `CONTRIBUTING.md`
 - Backend tests: `backend/tests/README.md`
+- Interview presentation page: `INTERVIEW_PRESENTATION.md`
 
 ---
 
@@ -190,3 +208,50 @@ make test-backend
 - Add vector DB backend (`pgvector` or `Qdrant`)
 - Add structured observability dashboards (latency/error/search quality)
 - Add personalization/session memory and explainable ranking
+
+---
+
+## CI and Quality Gates
+
+- GitHub Actions workflow at `.github/workflows/ci.yml`
+- Runs on push + pull request:
+  - Backend tests (`pytest tests/test_api.py`)
+  - Frontend production build (`npm run build`)
+
+---
+
+## Health and Readiness Endpoints
+
+- `GET /healthz` basic process liveness
+- `GET /readyz` dependency and index readiness checks
+
+Quick checks:
+
+```bash
+make health
+make ready
+```
+
+---
+
+## Retrieval Evaluation (Interview Metric Demo)
+
+Use the labeled query set in `backend/scripts/eval_queries.json` to benchmark search quality:
+
+```bash
+make eval-retrieval
+```
+
+Or run directly:
+
+```bash
+cd backend
+python scripts/eval_retrieval.py --top-k 5 --json-output .cache/eval_report.json
+```
+
+Offline-safe mode (forces TF-IDF evaluation path):
+
+```bash
+cd backend
+python scripts/eval_retrieval.py --top-k 5 --force-tfidf
+```

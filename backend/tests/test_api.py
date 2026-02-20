@@ -142,6 +142,24 @@ def test_catalog_returns_items(client: TestClient):
     assert body[0]["image_path"] == "bags/bag1_brown.jpg"
 
 
+def test_healthz_returns_ok(client: TestClient):
+    resp = client.get("/healthz")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "ok"
+    assert body["service"] == "ai-commerce-agent"
+
+
+def test_readyz_returns_ok(client: TestClient):
+    resp = client.get("/readyz")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "ok"
+    assert body["details"]["catalog_path_exists"] is True
+    assert body["details"]["text_index_ready"] is True
+    assert body["details"]["vision_index_ready"] is True
+
+
 def test_search_text_accepts_alias_query_key(client: TestClient):
     resp = client.post("/api/search_text", json={"query": "bags", "k": 5})
     assert resp.status_code == 200
@@ -190,3 +208,74 @@ def test_reindex_returns_success_response(client: TestClient):
     body = resp.json()
     assert body["ok"] is True
     assert "Regenerated catalog" in body["message"]
+
+
+def test_compare_advice_returns_recommendation(client: TestClient):
+    payload = {
+        "items": [
+            {
+                "id": "item-1",
+                "title": "Brown Everyday Tote",
+                "category": "bags",
+                "color": "brown",
+                "price": 59.0,
+                "description": "Daily tote bag",
+                "score": 0.6,
+                "image_path": "bags/bag1_brown.jpg",
+            },
+            {
+                "id": "item-2",
+                "title": "Pink Casual Sneakers",
+                "category": "shoes",
+                "color": "pink",
+                "price": 79.0,
+                "description": "Casual sneakers",
+                "score": 0.4,
+                "image_path": "shoes/shoe4_pink.jpg",
+            },
+        ],
+        "user_goal": "Best value",
+        "require_ai": False,
+    }
+    resp = client.post("/api/compare_advice", json=payload)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["summary"]
+    assert isinstance(body["bullets"], list)
+    assert body["recommended_item_id"] in {"item-1", "item-2"}
+    assert body["source"] in {"heuristic", "llm"}
+
+
+def test_compare_advice_require_ai_without_key_returns_heuristic_fallback(client: TestClient, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    payload = {
+        "items": [
+            {
+                "id": "item-1",
+                "title": "Brown Everyday Tote",
+                "category": "bags",
+                "color": "brown",
+                "price": 59.0,
+                "description": "Daily tote bag",
+                "score": 0.6,
+                "image_path": "bags/bag1_brown.jpg",
+            },
+            {
+                "id": "item-2",
+                "title": "Pink Casual Sneakers",
+                "category": "shoes",
+                "color": "pink",
+                "price": 79.0,
+                "description": "Casual sneakers",
+                "score": 0.4,
+                "image_path": "shoes/shoe4_pink.jpg",
+            },
+        ],
+        "user_goal": "Best value",
+        "require_ai": True,
+    }
+    resp = client.post("/api/compare_advice", json=payload)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["source"] == "heuristic"
+    assert body["summary"]
