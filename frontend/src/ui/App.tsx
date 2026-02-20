@@ -21,14 +21,11 @@ type ExplainContext = {
 }
 
 const PROMPT_CHIPS = [
-  "Show me pink shoes under $90",
-  "Find black jackets for winter",
-  "Travel bags under $80",
+  "Show me shoes under 90",
+  "Find brown jackets",
   "What can you do?",
-  "Show caps in blue color",
 ]
 
-const HISTORY_KEY = "mercury_query_history_v1"
 const COMPARE_ITEMS_KEY = "mercury_compare_items_v1"
 
 const BLUE = "#19E3FF"
@@ -56,26 +53,27 @@ const styles: Record<string, React.CSSProperties | any> = {
   },
   header: {
     display: "grid",
-    gridTemplateColumns: "auto 1fr auto",
+    gridTemplateColumns: "1fr auto 1fr",
     alignItems: "center",
     gap: 20,
     marginBottom: 14,
   },
   logoBox: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
+    width: 84,
+    height: 84,
+    borderRadius: 20,
     background: "linear-gradient(145deg, #0f1a3a, #0a1027)",
     boxShadow: "0 8px 24px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.06) inset",
     display: "grid",
     placeItems: "center",
     overflow: "hidden",
+    justifySelf: "start",
   },
-  logo: { width: 46, height: 46 },
-  titleBlock: { display: "flex", flexDirection: "column" },
+  logo: { width: 62, height: 62 },
+  titleBlock: { display: "flex", flexDirection: "column", textAlign: "center", alignItems: "center", justifySelf: "center" },
   title: { fontSize: 48, fontWeight: 900, letterSpacing: 0.3, lineHeight: 1.06 },
   ai: { color: BLUE, textShadow: `0 0 18px ${BLUE}66` },
-  tagline: { color: MUTED, marginTop: 10, fontSize: 17, maxWidth: 1000 },
+  tagline: { color: MUTED, marginTop: 10, fontSize: 17, maxWidth: 900, lineHeight: 1.45 },
   docsBtn: {
     background: "transparent",
     border: `1px solid ${BLUE}`,
@@ -94,6 +92,7 @@ const styles: Record<string, React.CSSProperties | any> = {
     gap: 8,
     flexWrap: "wrap",
     justifyContent: "flex-end",
+    justifySelf: "end",
   },
   actionBtn: {
     display: "inline-flex",
@@ -251,6 +250,23 @@ const styles: Record<string, React.CSSProperties | any> = {
     color: "#B7CFE2",
     marginTop: 4,
   },
+  mediaRow: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+    gap: 16,
+    marginTop: 14,
+  },
+  mediaCard: {
+    marginTop: 0,
+    background:
+      "linear-gradient(180deg, rgba(17, 28, 63, 0.9), rgba(12, 19, 45, 0.92))",
+    borderRadius: 16,
+    border: "1px solid rgba(25,227,255,0.28)",
+    boxShadow: "0 10px 24px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,0.04)",
+    padding: 16,
+  },
+  mediaLabel: { color: "#D8EEFA", fontSize: 15, marginBottom: 8, fontWeight: 700 },
+  mediaHint: { color: MUTED, fontSize: 12.5, marginTop: 8 },
   compareTray: {
     marginTop: 24,
     borderRadius: 16,
@@ -382,19 +398,11 @@ const buildWhyResult = (item: Item, ctx: ExplainContext) => {
   const inBudget =
     (ctx.minPrice === null || item.price >= ctx.minPrice) &&
     (ctx.maxPrice === null || item.price <= ctx.maxPrice)
-  const colorBonus = colorMatch ? 0.12 : 0
-  const categoryBonus = categoryMatch ? 0.12 : 0
-  const budgetBonus = inBudget ? 0.08 : -0.04
-  const total = clamp(semantic + colorBonus + categoryBonus + budgetBonus, 0, 1.5)
   return {
     categoryMatch,
     colorMatch,
     inBudget,
     semantic: semantic.toFixed(2),
-    colorBonus: colorBonus.toFixed(2),
-    categoryBonus: categoryBonus.toFixed(2),
-    budgetBonus: budgetBonus.toFixed(2),
-    total: total.toFixed(2),
   }
 }
 
@@ -407,7 +415,6 @@ export default function App() {
   const [catalog, setCatalog] = useState<Item[]>([])
   const [loading, setLoading] = useState(false)
   const [compareIds, setCompareIds] = useState<string[]>([])
-  const [history, setHistory] = useState<string[]>([])
   const [explainContext, setExplainContext] = useState<ExplainContext>({
     query: "",
     categoryHint: null,
@@ -415,21 +422,6 @@ export default function App() {
     minPrice: null,
     maxPrice: null,
   })
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(HISTORY_KEY)
-      if (!raw) return
-      const parsed = JSON.parse(raw)
-      if (Array.isArray(parsed)) setHistory(parsed.filter((x) => typeof x === "string").slice(0, 8))
-    } catch {
-      // ignore broken local storage payloads
-    }
-  }, [])
-
-  useEffect(() => {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 8)))
-  }, [history])
 
   useEffect(() => {
     ;(async () => {
@@ -450,12 +442,6 @@ export default function App() {
     for (const it of recs) m.set(it.id, it)
     return m
   }, [catalog, recs])
-
-  const updateHistory = (q: string) => {
-    const normalized = q.trim()
-    if (!normalized) return
-    setHistory((prev) => [normalized, ...prev.filter((x) => x !== normalized)].slice(0, 8))
-  }
 
   const toggleCompare = (item: Item) => {
     setCompareIds((prev) => {
@@ -547,7 +533,6 @@ export default function App() {
         setRecs(recRes.results || [])
       }
 
-      updateHistory(activeQuery)
       setQuery(activeQuery)
     } catch {
       setReply("Something went wrong while searching. Try again.")
@@ -568,7 +553,7 @@ export default function App() {
               Mercury <span style={styles.ai}>AI</span> Commerce Agent
             </div>
             <div style={styles.tagline}>
-              Ask for recommendations with AI, then explore the full storefront and compare shortlisted items.
+              Your AI-native shopping copilot for discovery, visual search, and confident decisions. Ask naturally, browse the catalog, and compare options in a premium guided flow.
             </div>
           </div>
           <div style={styles.actionRow}>
@@ -631,41 +616,22 @@ export default function App() {
             ))}
           </div>
 
-          {history.length > 0 && (
-            <div style={{ marginTop: 10 }}>
-              <div style={{ color: MUTED, fontSize: 13.5 }}>Session history (click to rerun)</div>
-              <div style={styles.chipRow}>
-                {history.map((h) => (
-                  <button
-                    key={h}
-                    style={styles.chip(false)}
-                    onClick={() => {
-                      setQuery(h)
-                      void onAsk(h)
-                    }}
-                    title={h}
-                  >
-                    {h.length > 32 ? `${h.slice(0, 32)}...` : h}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 18, marginTop: 14 }}>
-            <div style={{ ...styles.panel, background: "rgba(18, 26, 56, 0.8)", marginTop: 0 }}>
-              <div style={{ color: MUTED, fontSize: 14, marginBottom: 8 }}>Upload an image</div>
-              <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+          <div style={styles.mediaRow}>
+            <div style={styles.mediaCard}>
+              <div style={styles.mediaLabel}>Upload an image</div>
+              <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} style={{ width: "100%" }} />
+              <div style={styles.mediaHint}>Drop a product photo to instantly find visually similar items.</div>
               {file && <div style={{ color: MUTED, fontSize: 12, marginTop: 8 }}>Selected: {file.name}</div>}
             </div>
-            <div style={{ ...styles.panel, background: "rgba(18, 26, 56, 0.8)", marginTop: 0 }}>
-              <div style={{ color: MUTED, fontSize: 14, marginBottom: 8 }}>...or paste image URL</div>
+            <div style={styles.mediaCard}>
+              <div style={styles.mediaLabel}>Paste image URL</div>
               <input
                 style={styles.textInput}
-                placeholder="https://example.com/photo.jpg"
+                placeholder="https://example.com/product-photo.jpg"
                 value={imageUrl}
                 onChange={(e) => setImageUrl(e.target.value)}
               />
+              <div style={styles.mediaHint}>Use a direct image link from any store or catalog page.</div>
             </div>
           </div>
         </div>
@@ -718,24 +684,8 @@ export default function App() {
                         <span>{why.inBudget ? "yes" : "no"}</span>
                       </div>
                       <div style={styles.reasonLine}>
-                        <span>Semantic</span>
+                        <span>Relevance</span>
                         <span>{why.semantic}</span>
-                      </div>
-                      <div style={styles.reasonLine}>
-                        <span>Color bonus</span>
-                        <span>{why.colorBonus}</span>
-                      </div>
-                      <div style={styles.reasonLine}>
-                        <span>Category bonus</span>
-                        <span>{why.categoryBonus}</span>
-                      </div>
-                      <div style={styles.reasonLine}>
-                        <span>Budget bonus</span>
-                        <span>{why.budgetBonus}</span>
-                      </div>
-                      <div style={{ ...styles.reasonLine, fontWeight: 800, marginTop: 8 }}>
-                        <span>Estimated total</span>
-                        <span>{why.total}</span>
                       </div>
                     </div>
                   </div>
