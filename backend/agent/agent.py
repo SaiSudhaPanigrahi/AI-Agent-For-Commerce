@@ -41,6 +41,8 @@ def _format_results_text(items: List[Dict[str, Any]], max_n: int = 5) -> str:
 _PRICE_BETWEEN = re.compile(r"between\s*\$?(\d+(?:\.\d+)?)\s*(?:and|to)\s*\$?(\d+(?:\.\d+)?)", re.I)
 _PRICE_UNDER   = re.compile(r"(under|less than|below)\s*\$?(\d+(?:\.\d+)?)", re.I)
 _PRICE_OVER    = re.compile(r"(over|more than|above)\s*\$?(\d+(?:\.\d+)?)", re.I)
+_COLOR_WORDS = ("red", "blue", "green", "black", "white", "yellow", "brown", "gray", "grey", "purple", "pink", "orange")
+_COLOR_ALIASES = {"grey": "gray"}
 
 def _extract_prices_from_text(t: str) -> Tuple[Optional[float], Optional[float]]:
     if not t:
@@ -64,6 +66,23 @@ def _extract_category_fallback(t: str) -> Optional[str]:
     if "bag" in s: return "bags"
     if "jacket" in s or "coat" in s: return "jackets"
     return None
+
+
+def _extract_colors_from_text(t: str) -> List[str]:
+    s = (t or "").lower()
+    out: List[str] = []
+    for c in _COLOR_WORDS:
+        if re.search(rf"\b{c}\b", s):
+            cc = _COLOR_ALIASES.get(c, c)
+            if cc not in out:
+                out.append(cc)
+    return out
+
+
+def _norm_color_value(t: Optional[str]) -> Optional[str]:
+    if not t:
+        return None
+    return _COLOR_ALIASES.get(t.strip().lower(), t.strip().lower())
 
 # ---------------- agent ----------------
 
@@ -147,6 +166,7 @@ class Agent:
         q = user_text.strip()
         category = _extract_category_fallback(user_text)  # ensure “caps” is respected even if Gemini misses it
         color = None
+        requested_colors = _extract_colors_from_text(user_text)
         min_price, max_price = _extract_prices_from_text(user_text)
         k = 12
 
@@ -196,11 +216,27 @@ class Agent:
         except Exception:
             pass  # fall back to deterministic path
 
+        # If user asked for multiple colors (e.g. "pink or red"), do not force a single-color hard filter.
+        if len(requested_colors) > 1:
+            color = None
+        elif len(requested_colors) == 1 and not color:
+            color = requested_colors[0]
+
         # Run search (strict price filters if provided)
         items = self.text_index.search_with_filters(
             q, category=category, color=color,
             min_price=min_price, max_price=max_price, top_k=k
         )
+
+        # Multi-color query support: keep only the requested colors when multiple were asked.
+        if len(requested_colors) > 1 and items:
+            wanted = set(requested_colors)
+            multi_color_items = [
+                it for it in items
+                if _norm_color_value(it.get("color")) in wanted
+            ]
+            if multi_color_items:
+                items = multi_color_items
 
         # Extra guard: remove any > max_price
         if max_price is not None:

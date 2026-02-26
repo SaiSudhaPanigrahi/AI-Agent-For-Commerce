@@ -1,0 +1,588 @@
+[
+  {
+    "id": "item-1",
+    "title": "Blue Trucker Hat",
+    "category": "caps",
+    "color": "blue",
+    "price": 23.66,
+    "description": "Blue Trucker Hat crafted with recycled-blend materials for mesh, casual. Offers travel-ready design. A reliable cap you can use daily.",
+    "tags": [
+      "mesh",
+      "casual"
+    ],
+    "image_path": "caps/cap5_blue.jpg"
+  },
+  {
+    "id": "item-2",
+    "title": "Green Baseball Cap",
+    "category": "caps",
+    "color": "green",
+    "price": 29.1,
+    "description": "Green Baseball Cap crafted with premium knit materials for classic, sun. Offers modern silhouette. A reliable cap you can use daily.",
+    "tags": [
+      "classic",
+      "sun"
+    ],
+    "image_path": "caps/cap4_green.jpg"
+  },
+  {
+    "id": "item-3",
+    "title": "White Baseball Cap",
+    "category": "caps",
+    "color": "white",
+    "price": 25.39,
+    "description": "White Baseball Cap crafted with breathable materials for classic, sun. Offers easy care. A reliable cap you can use daily.",
+    "tags": [
+      "classic",
+      "sun"
+    ],
+    "image_path": "caps/cap8_white.jpg"
+  },
+  {
+    "id": "item-4",
+    "title": "Pink Baseball Cap",
+    "category": "caps",
+    "color": "pink",
+    "price": 30.65,
+    "description": "Pink Baseball Cap crafted with lightweight materials for classic, sun. Offers travel-ready design. A reliable cap you can use daily.",
+    "tags": [
+      "classic",
+      "sun"
+    ],
+    "image_path": "caps/cap3_pink.jpg"
+  },
+  {
+    "id": "item-5",
+    "title": "White Trucker Hat",
+    "category": "caps",
+    "color": "white",
+    "price": 27.22,
+    "description": "White Trucker Hat crafted with all-season materials for mesh, casual. Offers everyday practicality. A reliable cap you can use daily.",
+    "tags": [
+      "mesh",
+      "casual"
+    ],
+    "image_path": "caps/cap10_white.jpg"
+  },
+  {
+    "id": "item-6",
+    "title": "Gray Thermal Knit Beanie",
+    "category": "caps",
+    "color": "gray",
+    "price": 32.42,
+    "description": "Gray Thermal Knit Beanie crafted with all-season materials for winter, thermal. Offers modern silhouette. A reliable cap you can use daily.",
+    "tags": [
+      "winter",
+      "thermal",
+      "beanie"
+    ],
+    "image_path": "caps/cap2_grey.jpg"
+  },
+  {
+    "id": "item-7",
+    "title": "Black Running Cap",
+    "category": "caps",
+    "color": "black",
+    "price": 30.76,
+    "description": "Black Running Cap crafted with quick-dry materials for running, lightweight. Offers all-day comfort. A reliable cap you can use daily.",
+    "tags": [
+      "running",
+      "lightweight",
+      "breathable"
+    ],
+    "image_path": "caps/cap9_black.jpg"
+  },
+  {
+    "id": "item-8",
+    "title": "Blue Thermal Knit Beanie",
+    "category": "caps",
+    "color": "blue",
+    "price": 19.18,
+    "description": "Blue Thermal Knit Beanie crafted with premium knit materials for winter, thermal. Offers travel-ready design. A reliable cap you can use daily.",
+    "tags": [
+      "winter",
+      "thermal",
+      "beanie"
+    ],
+    "image_path": "caps/cap11_blue.jpg"
+  },
+  {
+    "id": "item-9",
+    "title": "Blue Running Cap",
+    "category": "caps",
+    "color": "blue",
+    "price": 23.35,
+    "description": "Blue Running Cap crafted with premium knit materials for running, lightweight. Offers modern silhouette. A reliable cap you can use daily.",
+    "tags": [
+      "running",
+      "lightweight",
+      "breathable"
+    ],
+    "image_path": "caps/cap6_blue.jpg"
+  },
+  {
+    "id": "item-10",
+    "title": "Brown Thermal Knit Beanie",
+    "category": "caps",
+    "color": "brown",
+    "price": 20.56,
+    "description": "Brown Thermal Knit Beanie crafted with soft-touch materials for winter, thermal. Offers everyday practicality. A reliable cap you can use daily.",
+    "tags": [
+      "winter",
+      "thermal",
+      "beanie"
+    ],
+    "image_path": "caps/cap7_brown.jpg"
+  },
+  {
+    "id": "item-11",
+    "title": "Brown Thermal Knit Beanie",
+    "category": "caps",
+    "color": "brown",
+    "price": 27.76,
+    "description": "Brown Thermal Knit Beanie crafted with lightweight materials for winter, thermal. Offers everyday practicality. A reliable cap you can use daily.",
+    "tags": [
+      "winter",
+      "thermal",
+      "beanie"
+    ],
+    "image_path": "caps/cap1_brown.jpg"
+  },
+  {
+    "id": "item-12",
+    "title": "Red Everyday Tote",
+    "category": "bags",
+    "color": "red",
+    "price": 49.78,
+    "description": "Red Everyday Tote crafted with soft-touch materials for tote, commute. Offers modern silhouette. A reliable bag you can use daily.",
+    "tags": [
+      "tote",
+      "commute",
+      "everyday"
+    ],
+    "image_path": "bags/bag3_red.jpg"
+  },
+  {
+    "id": "item-13",
+    "title": "Pink Crossbody Bag",
+    "category": "bags",
+    "color": "pink",
+    "price": 61.07,
+    "description": "Pink Crossbody Bag crafted with lightweight materials for crossbody, compact. Offers secure fit. A reliable bag you can use daily.",
+    "tags": [
+      "crossbody",
+      "compact",
+      "city"
+    ],
+    "image_path": "bags/bag10_pink.jpg"
+  },
+  {
+    "id": "item-14",
+    "title": "Black Everyday Tote",
+    "category": "bags",
+    "color": "black",
+    "price": 60.86,
+    "description": "Black Everyday Tote crafted with lightweight materials for tote, commute. Offers everyday practicality. A reliable bag you can use daily.",
+    "tags": [
+      "tote",
+      "commute",
+      "everyday"
+    ],
+    "image_path": "bags/bag4_black.jpg"
+  },
+  {
+    "id": "item-15",
+    "title": "Brown Travel Duffel",
+    "category": "bags",
+    "color": "brown",
+    "price": 63.36,
+    "description": "Brown Travel Duffel crafted with premium knit materials for travel, duffel. Offers versatile style. A reliable bag you can use daily.",
+    "tags": [
+      "travel",
+      "duffel",
+      "weekend"
+    ],
+    "image_path": "bags/bag1_brown.jpg"
+  },
+  {
+    "id": "item-16",
+    "title": "Pink Crossbody Bag",
+    "category": "bags",
+    "color": "pink",
+    "price": 49.51,
+    "description": "Pink Crossbody Bag crafted with premium knit materials for crossbody, compact. Offers versatile style. A reliable bag you can use daily.",
+    "tags": [
+      "crossbody",
+      "compact",
+      "city"
+    ],
+    "image_path": "bags/bag9_pink.jpg"
+  },
+  {
+    "id": "item-17",
+    "title": "Pink Daypack Backpack",
+    "category": "bags",
+    "color": "pink",
+    "price": 57.8,
+    "description": "Pink Daypack Backpack crafted with premium knit materials for backpack, daypack. Offers versatile style. A reliable bag you can use daily.",
+    "tags": [
+      "backpack",
+      "daypack",
+      "school"
+    ],
+    "image_path": "bags/bag8_pink.jpg"
+  },
+  {
+    "id": "item-18",
+    "title": "White Crossbody Bag",
+    "category": "bags",
+    "color": "white",
+    "price": 55.76,
+    "description": "White Crossbody Bag crafted with durable materials for crossbody, compact. Offers easy care. A reliable bag you can use daily.",
+    "tags": [
+      "crossbody",
+      "compact",
+      "city"
+    ],
+    "image_path": "bags/bag7_white.jpg"
+  },
+  {
+    "id": "item-19",
+    "title": "Brown Travel Duffel",
+    "category": "bags",
+    "color": "brown",
+    "price": 49.28,
+    "description": "Brown Travel Duffel crafted with lightweight materials for travel, duffel. Offers all-day comfort. A reliable bag you can use daily.",
+    "tags": [
+      "travel",
+      "duffel",
+      "weekend"
+    ],
+    "image_path": "bags/bag2_brown.jpg"
+  },
+  {
+    "id": "item-20",
+    "title": "Blue Everyday Tote",
+    "category": "bags",
+    "color": "blue",
+    "price": 49.04,
+    "description": "Blue Everyday Tote crafted with premium knit materials for tote, commute. Offers travel-ready design. A reliable bag you can use daily.",
+    "tags": [
+      "tote",
+      "commute",
+      "everyday"
+    ],
+    "image_path": "bags/bag6_blue.jpg"
+  },
+  {
+    "id": "item-21",
+    "title": "Brown Daypack Backpack",
+    "category": "bags",
+    "color": "brown",
+    "price": 51.11,
+    "description": "Brown Daypack Backpack crafted with all-season materials for backpack, daypack. Offers versatile style. A reliable bag you can use daily.",
+    "tags": [
+      "backpack",
+      "daypack",
+      "school"
+    ],
+    "image_path": "bags/bag5_brown.jpg"
+  },
+  {
+    "id": "item-22",
+    "title": "Green Casual Sneakers",
+    "category": "shoes",
+    "color": "green",
+    "price": 69.89,
+    "description": "Green Casual Sneakers crafted with recycled-blend materials for casual, everyday. Offers travel-ready design. A reliable shoe you can use daily.",
+    "tags": [
+      "casual",
+      "everyday"
+    ],
+    "image_path": "shoes/shoe10_green.jpg"
+  },
+  {
+    "id": "item-23",
+    "title": "Black Training Sneakers",
+    "category": "shoes",
+    "color": "black",
+    "price": 79.86,
+    "description": "Black Training Sneakers crafted with quick-dry materials for training, gym. Offers everyday practicality. A reliable shoe you can use daily.",
+    "tags": [
+      "training",
+      "gym",
+      "cross"
+    ],
+    "image_path": "shoes/shoe6_black.jpg"
+  },
+  {
+    "id": "item-24",
+    "title": "Green Running Shoes",
+    "category": "shoes",
+    "color": "green",
+    "price": 81.1,
+    "description": "Green Running Shoes crafted with quick-dry materials for running, road. Offers easy care. A reliable shoe you can use daily.",
+    "tags": [
+      "running",
+      "road",
+      "cushion"
+    ],
+    "image_path": "shoes/shoe3_green.jpg"
+  },
+  {
+    "id": "item-25",
+    "title": "Gray Casual Sneakers",
+    "category": "shoes",
+    "color": "gray",
+    "price": 71.19,
+    "description": "Gray Casual Sneakers crafted with breathable materials for casual, everyday. Offers versatile style. A reliable shoe you can use daily.",
+    "tags": [
+      "casual",
+      "everyday"
+    ],
+    "image_path": "shoes/shoe8_grey.jpg"
+  },
+  {
+    "id": "item-26",
+    "title": "Green Training Sneakers",
+    "category": "shoes",
+    "color": "green",
+    "price": 75.48,
+    "description": "Green Training Sneakers crafted with lightweight materials for training, gym. Offers all-day comfort. A reliable shoe you can use daily.",
+    "tags": [
+      "training",
+      "gym",
+      "cross"
+    ],
+    "image_path": "shoes/shoe5_green.jpg"
+  },
+  {
+    "id": "item-27",
+    "title": "Yellow Casual Sneakers",
+    "category": "shoes",
+    "color": "yellow",
+    "price": 79.28,
+    "description": "Yellow Casual Sneakers crafted with premium knit materials for casual, everyday. Offers modern silhouette. A reliable shoe you can use daily.",
+    "tags": [
+      "casual",
+      "everyday"
+    ],
+    "image_path": "shoes/shoe2_yellow.jpg"
+  },
+  {
+    "id": "item-28",
+    "title": "Black Trail Runners",
+    "category": "shoes",
+    "color": "black",
+    "price": 75.33,
+    "description": "Black Trail Runners crafted with premium knit materials for trail, outdoor. Offers all-day comfort. A reliable shoe you can use daily.",
+    "tags": [
+      "trail",
+      "outdoor",
+      "grip"
+    ],
+    "image_path": "shoes/shoe9_black.jpg"
+  },
+  {
+    "id": "item-29",
+    "title": "Orange Running Shoes",
+    "category": "shoes",
+    "color": "orange",
+    "price": 76.22,
+    "description": "Orange Running Shoes crafted with water-resistant materials for running, road. Offers everyday practicality. A reliable shoe you can use daily.",
+    "tags": [
+      "running",
+      "road",
+      "cushion"
+    ],
+    "image_path": "shoes/shoe11_orange.jpg"
+  },
+  {
+    "id": "item-30",
+    "title": "Pink Training Sneakers",
+    "category": "shoes",
+    "color": "pink",
+    "price": 75.57,
+    "description": "Pink Training Sneakers crafted with soft-touch materials for training, gym. Offers versatile style. A reliable shoe you can use daily.",
+    "tags": [
+      "training",
+      "gym",
+      "cross"
+    ],
+    "image_path": "shoes/shoe4_pink.jpg"
+  },
+  {
+    "id": "item-31",
+    "title": "Red Trail Runners",
+    "category": "shoes",
+    "color": "red",
+    "price": 83.47,
+    "description": "Red Trail Runners crafted with all-season materials for trail, outdoor. Offers easy care. A reliable shoe you can use daily.",
+    "tags": [
+      "trail",
+      "outdoor",
+      "grip"
+    ],
+    "image_path": "shoes/shoe1_red.jpg"
+  },
+  {
+    "id": "item-32",
+    "title": "Green Casual Sneakers",
+    "category": "shoes",
+    "color": "green",
+    "price": 73.97,
+    "description": "Green Casual Sneakers crafted with recycled-blend materials for casual, everyday. Offers travel-ready design. A reliable shoe you can use daily.",
+    "tags": [
+      "casual",
+      "everyday"
+    ],
+    "image_path": "shoes/shoe7_green.jpg"
+  },
+  {
+    "id": "item-33",
+    "title": "Black Lightweight Windbreaker",
+    "category": "jackets",
+    "color": "black",
+    "price": 105.07,
+    "description": "Black Lightweight Windbreaker crafted with premium knit materials for windbreaker, windproof. Offers easy care. A reliable jacket you can use daily.",
+    "tags": [
+      "windbreaker",
+      "windproof"
+    ],
+    "image_path": "jackets/jacket8_black.jpg"
+  },
+  {
+    "id": "item-34",
+    "title": "Brown Insulated Puffer Jacket",
+    "category": "jackets",
+    "color": "brown",
+    "price": 111.53,
+    "description": "Brown Insulated Puffer Jacket crafted with recycled-blend materials for winter, insulated. Offers easy care. A reliable jacket you can use daily.",
+    "tags": [
+      "winter",
+      "insulated",
+      "puffer"
+    ],
+    "image_path": "jackets/jacket1_brown.jpg"
+  },
+  {
+    "id": "item-35",
+    "title": "Brown Fleece Zip Jacket",
+    "category": "jackets",
+    "color": "brown",
+    "price": 106.36,
+    "description": "Brown Fleece Zip Jacket crafted with soft-touch materials for fleece, cozy. Offers travel-ready design. A reliable jacket you can use daily.",
+    "tags": [
+      "fleece",
+      "cozy"
+    ],
+    "image_path": "jackets/jacket6_brown.jpg"
+  },
+  {
+    "id": "item-36",
+    "title": "Green Lightweight Windbreaker",
+    "category": "jackets",
+    "color": "green",
+    "price": 112.02,
+    "description": "Green Lightweight Windbreaker crafted with premium knit materials for windbreaker, windproof. Offers all-day comfort. A reliable jacket you can use daily.",
+    "tags": [
+      "windbreaker",
+      "windproof"
+    ],
+    "image_path": "jackets/jacket7_green.jpg"
+  },
+  {
+    "id": "item-37",
+    "title": "Pink Fleece Zip Jacket",
+    "category": "jackets",
+    "color": "pink",
+    "price": 107.79,
+    "description": "Pink Fleece Zip Jacket crafted with premium knit materials for fleece, cozy. Offers easy care. A reliable jacket you can use daily.",
+    "tags": [
+      "fleece",
+      "cozy"
+    ],
+    "image_path": "jackets/jacket11_pink.jpg"
+  },
+  {
+    "id": "item-38",
+    "title": "Green Lightweight Windbreaker",
+    "category": "jackets",
+    "color": "green",
+    "price": 111.91,
+    "description": "Green Lightweight Windbreaker crafted with lightweight materials for windbreaker, windproof. Offers travel-ready design. A reliable jacket you can use daily.",
+    "tags": [
+      "windbreaker",
+      "windproof"
+    ],
+    "image_path": "jackets/jacket4_green.jpg"
+  },
+  {
+    "id": "item-39",
+    "title": "Blue Fleece Zip Jacket",
+    "category": "jackets",
+    "color": "blue",
+    "price": 106.2,
+    "description": "Blue Fleece Zip Jacket crafted with soft-touch materials for fleece, cozy. Offers everyday practicality. A reliable jacket you can use daily.",
+    "tags": [
+      "fleece",
+      "cozy"
+    ],
+    "image_path": "jackets/jacket3_blue.jpg"
+  },
+  {
+    "id": "item-40",
+    "title": "Blue Lightweight Windbreaker",
+    "category": "jackets",
+    "color": "blue",
+    "price": 105.07,
+    "description": "Blue Lightweight Windbreaker crafted with breathable materials for windbreaker, windproof. Offers all-day comfort. A reliable jacket you can use daily.",
+    "tags": [
+      "windbreaker",
+      "windproof"
+    ],
+    "image_path": "jackets/jacket2_blue.jpg"
+  },
+  {
+    "id": "item-41",
+    "title": "Blue Insulated Puffer Jacket",
+    "category": "jackets",
+    "color": "blue",
+    "price": 99.41,
+    "description": "Blue Insulated Puffer Jacket crafted with all-season materials for winter, insulated. Offers travel-ready design. A reliable jacket you can use daily.",
+    "tags": [
+      "winter",
+      "insulated",
+      "puffer"
+    ],
+    "image_path": "jackets/jacket9_blue.jpg"
+  },
+  {
+    "id": "item-42",
+    "title": "Red Insulated Puffer Jacket",
+    "category": "jackets",
+    "color": "red",
+    "price": 109.18,
+    "description": "Red Insulated Puffer Jacket crafted with recycled-blend materials for winter, insulated. Offers versatile style. A reliable jacket you can use daily.",
+    "tags": [
+      "winter",
+      "insulated",
+      "puffer"
+    ],
+    "image_path": "jackets/jacket10_red.jpg"
+  },
+  {
+    "id": "item-43",
+    "title": "Yellow Insulated Puffer Jacket",
+    "category": "jackets",
+    "color": "yellow",
+    "price": 100.5,
+    "description": "Yellow Insulated Puffer Jacket crafted with breathable materials for winter, insulated. Offers all-day comfort. A reliable jacket you can use daily.",
+    "tags": [
+      "winter",
+      "insulated",
+      "puffer"
+    ],
+    "image_path": "jackets/jacket5_yellow.jpg"
+  }
+]

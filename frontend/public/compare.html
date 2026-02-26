@@ -238,7 +238,13 @@
         const listEl = byId("aiList");
         if (!sourceEl || !summaryEl || !listEl) return;
 
-        const source = advice && advice.source === "heuristic" ? "heuristic fallback" : "Gemini";
+        const provider = String((advice && advice.provider) || "").toLowerCase();
+        const source =
+          provider === "gemini"
+            ? "Gemini"
+            : provider === "groq"
+              ? "Groq"
+              : "heuristic fallback";
         sourceEl.textContent = `AI Source: ${source}`;
         summaryEl.textContent = advice.summary || "Recommendation generated.";
         const bullets =
@@ -255,7 +261,7 @@
         if (!sourceEl || !summaryEl || !listEl) return;
         sourceEl.textContent = "AI Source: unavailable";
         summaryEl.textContent = message || "AI compare is currently unavailable.";
-        listEl.innerHTML = "<li>Check backend availability. If Gemini is unavailable, heuristic fallback should be returned automatically.</li>";
+        listEl.innerHTML = "<li>Check backend availability. Compare tries Gemini, then Groq, then heuristic fallback automatically.</li>";
       }
 
       async function updateAdvice(items, seq) {

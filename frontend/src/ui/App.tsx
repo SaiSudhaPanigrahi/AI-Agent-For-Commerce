@@ -185,6 +185,17 @@ const styles: Record<string, React.CSSProperties | any> = {
     cursor: "pointer",
     fontSize: 12.5,
   },
+  smallGhostBtnAlt: {
+    background: "transparent",
+    color: TEAL,
+    border: `1px solid ${TEAL}`,
+    height: 34,
+    padding: "0 10px",
+    borderRadius: 10,
+    fontWeight: 700,
+    cursor: "pointer",
+    fontSize: 12.5,
+  },
   textarea: {
     width: "100%",
     minHeight: 120,
@@ -348,6 +359,7 @@ const api = {
 }
 
 const cdn = (p: string) => `/data/${p}`
+const productUrl = (id: string) => `/product.html?id=${encodeURIComponent(id || "")}`
 
 const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n))
 
@@ -478,6 +490,14 @@ export default function App() {
     }
   }
 
+  const openProductPage = (item: Item) => {
+    const target = productUrl(item.id)
+    const popup = window.open(target, "_blank")
+    if (!popup) {
+      setReply("Popup blocked. Allow popups for this site to open product page.")
+    }
+  }
+
   const onAsk = async (forcedQuery?: string) => {
     const activeQuery = (forcedQuery ?? query).trim()
     if (!activeQuery && !file && !imageUrl.trim()) return
@@ -502,14 +522,26 @@ export default function App() {
     try {
       if (file) {
         const res = await api.imageSearchUpload(file, 12)
-        setReply("Here are visually similar items:")
-        setRecs(res.results || [])
+        const items = res.results || []
+        if (items.length === 0) {
+          setReply("No close visual matches found. Try a clearer product image (single item, less background).")
+          setRecs([])
+        } else {
+          setReply("Here are visually similar items:")
+          setRecs(items)
+        }
         return
       }
       if (imageUrl.trim()) {
         const res = await api.imageSearchByUrl(imageUrl.trim(), 12)
-        setReply("Here are visually similar items:")
-        setRecs(res.results || [])
+        const items = res.results || []
+        if (items.length === 0) {
+          setReply("No close visual matches found. Use a direct image URL, or a product page that contains an og:image.")
+          setRecs([])
+        } else {
+          setReply("Here are visually similar items:")
+          setRecs(items)
+        }
         return
       }
 
@@ -666,9 +698,14 @@ export default function App() {
                     <div style={styles.price}>${it.price.toFixed(2)}</div>
                     <div style={styles.desc}>{it.description}</div>
                     {typeof it.score === "number" && <div style={styles.score}>raw score: {it.score.toFixed(3)}</div>}
-                    <button style={styles.smallGhostBtn} onClick={() => toggleCompare(it)}>
-                      {isCompared ? "Remove Compare" : "Add Compare"}
-                    </button>
+                    <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                      <button style={styles.smallGhostBtnAlt} onClick={() => openProductPage(it)}>
+                        View Product
+                      </button>
+                      <button style={styles.smallGhostBtn} onClick={() => toggleCompare(it)}>
+                        {isCompared ? "Remove Compare" : "Add Compare"}
+                      </button>
+                    </div>
                     <div style={styles.reasonBox}>
                       <div style={{ fontWeight: 700, fontSize: 13.5, color: "#DDF2FF" }}>Why this result</div>
                       <div style={styles.reasonLine}>

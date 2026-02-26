@@ -244,10 +244,12 @@ def test_compare_advice_returns_recommendation(client: TestClient):
     assert isinstance(body["bullets"], list)
     assert body["recommended_item_id"] in {"item-1", "item-2"}
     assert body["source"] in {"heuristic", "llm"}
+    assert body["provider"] in {"heuristic", "gemini", "groq"}
 
 
 def test_compare_advice_require_ai_without_key_returns_heuristic_fallback(client: TestClient, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
     payload = {
         "items": [
             {
@@ -278,4 +280,100 @@ def test_compare_advice_require_ai_without_key_returns_heuristic_fallback(client
     assert resp.status_code == 200
     body = resp.json()
     assert body["source"] == "heuristic"
+    assert body["provider"] == "heuristic"
     assert body["summary"]
+
+
+def test_compare_advice_malformed_llm_output_falls_back_to_heuristic(client: TestClient, monkeypatch: pytest.MonkeyPatch):
+    class _FakeResp:
+        text = '`json\n{"winner_id":"item-1","summary":"broken'
+
+    class _FakeModel:
+        def generate_content(self, _: object):
+            return _FakeResp()
+
+    monkeypatch.setenv("GOOGLE_API_KEY", "test-key")
+    monkeypatch.setattr("app.get_gemini_smalltalk", lambda: _FakeModel())
+
+    payload = {
+        "items": [
+            {
+                "id": "item-1",
+                "title": "Brown Everyday Tote",
+                "category": "bags",
+                "color": "brown",
+                "price": 59.0,
+                "description": "Daily tote bag",
+                "score": 0.6,
+                "image_path": "bags/bag1_brown.jpg",
+            },
+            {
+                "id": "item-2",
+                "title": "Pink Casual Sneakers",
+                "category": "shoes",
+                "color": "pink",
+                "price": 79.0,
+                "description": "Casual sneakers",
+                "score": 0.4,
+                "image_path": "shoes/shoe4_pink.jpg",
+            },
+        ],
+        "user_goal": "Best value",
+        "require_ai": False,
+    }
+    resp = client.post("/api/compare_advice", json=payload)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["source"] == "heuristic"
+    assert body["provider"] == "heuristic"
+    assert "winner_id" not in body["summary"].lower()
+
+
+def test_compare_advice_uses_groq_when_gemini_unavailable(client: TestClient, monkeypatch: pytest.MonkeyPatch):
+    groq_json = (
+        '{"winner_id":"item-2","summary":"Pink Casual Sneakers are the best overall pick for balanced value, '
+        'offering stronger versatility than the tote while keeping total cost practical.","bullets":['
+        '"Pink Casual Sneakers provide broader daily wear value than Brown Everyday Tote, while still keeping cost reasonable for a first purchase decision.",'
+        '"Brown Everyday Tote is cheaper, but Pink Casual Sneakers deliver more frequent utility across commuting, casual outings, and multi-season usage scenarios.",'
+        '"If style flexibility matters, Pink Casual Sneakers pair with more outfits than the tote, while still preserving a sensible mid-range budget profile.",'
+        '"Choose Brown Everyday Tote only when carrying capacity is your top priority; otherwise Pink Casual Sneakers win on all-around practicality and repeat use."'
+        "]}"
+    )
+
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    monkeypatch.setenv("GROQ_API_KEY", "test-groq-key")
+    monkeypatch.setattr("app.groq_compare_completion", lambda _prompt: groq_json)
+
+    payload = {
+        "items": [
+            {
+                "id": "item-1",
+                "title": "Brown Everyday Tote",
+                "category": "bags",
+                "color": "brown",
+                "price": 59.0,
+                "description": "Daily tote bag",
+                "score": 0.6,
+                "image_path": "bags/bag1_brown.jpg",
+            },
+            {
+                "id": "item-2",
+                "title": "Pink Casual Sneakers",
+                "category": "shoes",
+                "color": "pink",
+                "price": 79.0,
+                "description": "Casual sneakers",
+                "score": 0.4,
+                "image_path": "shoes/shoe4_pink.jpg",
+            },
+        ],
+        "user_goal": "Best value",
+        "require_ai": False,
+    }
+
+    resp = client.post("/api/compare_advice", json=payload)
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["source"] == "llm"
+    assert body["provider"] == "groq"
+    assert body["recommended_item_id"] == "item-2"

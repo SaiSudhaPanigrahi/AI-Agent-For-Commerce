@@ -7,7 +7,7 @@ import re
 import tempfile
 import time
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
@@ -35,6 +35,7 @@ from schemas import (
     SearchTextResponse,
 )
 from agent.gemini_client import get_gemini_smalltalk
+from agent.groq_client import groq_compare_completion
 from agent.agent import Agent
 from services.catalog_loader import ensure_catalog
 from services.text_index import TextIndex
@@ -319,6 +320,7 @@ def _heuristic_compare_advice(req: CompareAdviceRequest) -> CompareAdviceRespons
         bullets=bullets,
         recommended_item_id=best_value[0].id,
         source="heuristic",
+        provider="heuristic",
     )
 
 
@@ -340,6 +342,35 @@ def _extract_json_object(text: str) -> Optional[dict]:
     candidates = [raw]
     fenced = re.findall(r"```(?:json)?\s*([\s\S]*?)\s*```", raw, flags=re.IGNORECASE)
     candidates.extend(fenced)
+    # Some models occasionally emit malformed fences like "`json { ... }".
+    candidates.append(re.sub(r"^`+\s*json\s*", "", raw, flags=re.IGNORECASE).strip())
+
+    # Try parsing balanced {...} substrings from raw text as a last resort.
+    start = raw.find("{")
+    while start != -1:
+        depth = 0
+        in_string = False
+        escaped = False
+        for idx in range(start, len(raw)):
+            ch = raw[idx]
+            if in_string:
+                if escaped:
+                    escaped = False
+                elif ch == "\\":
+                    escaped = True
+                elif ch == '"':
+                    in_string = False
+                continue
+            if ch == '"':
+                in_string = True
+            elif ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    candidates.append(raw[start : idx + 1].strip())
+                    break
+        start = raw.find("{", start + 1)
 
     for candidate in candidates:
         body = candidate.strip()
@@ -352,6 +383,25 @@ def _extract_json_object(text: str) -> Optional[dict]:
         except Exception:
             continue
     return None
+
+
+def _looks_like_json_artifact(text: str) -> bool:
+    s = (text or "").strip().lower()
+    if not s:
+        return False
+    if s.startswith(("```", "`json", "json", "{", "[")):
+        return True
+    tokens = (
+        '"winner_id"',
+        '"recommended_item_id"',
+        '"summary"',
+        '"bullets"',
+        "winner_id:",
+        "recommended_item_id:",
+        "summary:",
+        "bullets:",
+    )
+    return any(tok in s for tok in tokens)
 
 
 def _parse_compare_ai_output(text: str, valid_ids: set[str], fallback_id: Optional[str]) -> Tuple[str, List[str], Optional[str]]:
@@ -375,8 +425,15 @@ def _parse_compare_ai_output(text: str, valid_ids: set[str], fallback_id: Option
     summary = ""
     bullets: List[str] = []
     for ln in lines:
+        # Skip JSON structure fragments and key/value lines.
+        if ln in {"{", "}", "[", "]", "```", "```json", "`json"}:
+            continue
+        if re.match(r'^"?[a-zA-Z_][a-zA-Z0-9_ ]*"?\s*:\s*', ln):
+            continue
         cleaned = _clean_ai_text_line(ln)
         if not cleaned:
+            continue
+        if _looks_like_json_artifact(cleaned):
             continue
         if ln.lstrip().startswith(("-", "•", "*")) or re.match(r"^\d+\.", ln.strip()):
             bullets.append(cleaned)
@@ -390,88 +447,123 @@ def _parse_compare_ai_output(text: str, valid_ids: set[str], fallback_id: Option
     return summary, bullets[:4], fallback_id
 
 
+def _is_valid_compare_output(summary: str, bullets: List[str]) -> bool:
+    if not summary or _looks_like_json_artifact(summary):
+        return False
+    if len(summary.strip()) < 16:
+        return False
+    valid_bullets = [b for b in bullets if b and not _looks_like_json_artifact(b)]
+    return len(valid_bullets) >= 2
+
+
 @app.post("/api/compare_advice", response_model=CompareAdviceResponse)
 async def compare_advice(req: CompareAdviceRequest):
     # Reload backend/.env so local key updates apply without restarting the server process.
     load_dotenv(dotenv_path=APP_DIR / ".env", override=True)
     heuristic = _heuristic_compare_advice(req)
+    compact = [
+        {
+            "id": it.id,
+            "title": it.title,
+            "category": it.category,
+            "color": it.color,
+            "price": float(it.price),
+            "description": it.description,
+        }
+        for it in req.items
+    ]
+    valid_ids = {it.id for it in req.items}
+    prompt = (
+        "You are an e-commerce comparison assistant. "
+        "Choose the best overall option and provide detailed, practical rationale.\n\n"
+        f"User goal: {req.user_goal}\n"
+        f"Items: {compact}\n\n"
+        "Return STRICT JSON only (no markdown, no extra text) using this schema:\n"
+        "{\n"
+        '  "winner_id": "<item id>",\n'
+        '  "summary": "<one sentence, 18-30 words>",\n'
+        '  "bullets": ["...", "...", "...", "..."]\n'
+        "}\n"
+        "Rules:\n"
+        "- Exactly 4 bullets.\n"
+        "- Each bullet must be 16-28 words.\n"
+        "- Mention concrete tradeoffs (price, category/use case, color/style, description-based utility).\n"
+        "- Compare at least two items by title in each bullet.\n"
+        "- Do not use markdown symbols."
+    )
 
-    api_key = os.getenv("GOOGLE_API_KEY", "").strip()
-    if not api_key:
-        logger.warning("compare_advice_fallback: GOOGLE_API_KEY missing")
-        return heuristic
+    async def _attempt_provider(provider: str, complete_fn: Callable[[str], str]) -> Optional[CompareAdviceResponse]:
+        text = (await asyncio.to_thread(complete_fn, prompt)).strip()
+        if not text:
+            logger.warning("compare_advice_%s_empty_response", provider)
+            return None
 
-    try:
-        model = get_gemini_smalltalk()
-        compact = [
-            {
-                "id": it.id,
-                "title": it.title,
-                "category": it.category,
-                "color": it.color,
-                "price": float(it.price),
-                "description": it.description,
-            }
-            for it in req.items
-        ]
-        prompt = (
-            "You are an e-commerce comparison assistant. "
-            "Choose the best overall option and provide detailed, practical rationale.\n\n"
-            f"User goal: {req.user_goal}\n"
-            f"Items: {compact}\n\n"
-            "Return STRICT JSON only (no markdown, no extra text) using this schema:\n"
-            "{\n"
-            '  "winner_id": "<item id>",\n'
-            '  "summary": "<one sentence, 18-30 words>",\n'
-            '  "bullets": ["...", "...", "...", "..."]\n'
-            "}\n"
-            "Rules:\n"
-            "- Exactly 4 bullets.\n"
-            "- Each bullet must be 16-28 words.\n"
-            "- Mention concrete tradeoffs (price, category/use case, color/style, description-based utility).\n"
-            "- Compare at least two items by title in each bullet.\n"
-            "- Do not use markdown symbols."
+        summary, bullets, winner_id = _parse_compare_ai_output(
+            text=text,
+            valid_ids=valid_ids,
+            fallback_id=heuristic.recommended_item_id,
         )
-        resp = await asyncio.to_thread(model.generate_content, [prompt])
-        text = (getattr(resp, "text", None) or "").strip()
-        if text:
-            valid_ids = {it.id for it in req.items}
-            summary, bullets, winner_id = _parse_compare_ai_output(
-                text=text,
-                valid_ids=valid_ids,
-                fallback_id=heuristic.recommended_item_id,
+        if len(summary) < 20 or len(bullets) < 3 or _looks_like_json_artifact(summary):
+            refine_prompt = (
+                "Rewrite the following compare output into richer STRICT JSON.\n"
+                f"Items: {compact}\n"
+                f"Raw output: {text}\n\n"
+                "Return JSON only with winner_id, summary, bullets[4]. "
+                "Keep summary 18-30 words and each bullet 16-28 words with practical tradeoffs."
             )
-            if len(summary) < 20 or len(bullets) < 3:
-                refine_prompt = (
-                    "Rewrite the following compare output into richer STRICT JSON.\n"
-                    f"Items: {compact}\n"
-                    f"Raw output: {text}\n\n"
-                    "Return JSON only with winner_id, summary, bullets[4]. "
-                    "Keep summary 18-30 words and each bullet 16-28 words with practical tradeoffs."
+            refine_text = (await asyncio.to_thread(complete_fn, refine_prompt)).strip()
+            if refine_text:
+                refined_summary, refined_bullets, refined_winner_id = _parse_compare_ai_output(
+                    text=refine_text,
+                    valid_ids=valid_ids,
+                    fallback_id=winner_id,
                 )
-                refine_resp = await asyncio.to_thread(model.generate_content, [refine_prompt])
-                refine_text = (getattr(refine_resp, "text", None) or "").strip()
-                if refine_text:
-                    refined_summary, refined_bullets, refined_winner_id = _parse_compare_ai_output(
-                        text=refine_text,
-                        valid_ids=valid_ids,
-                        fallback_id=winner_id,
-                    )
-                    if refined_summary:
-                        summary = refined_summary
-                    if len(refined_bullets) >= len(bullets):
-                        bullets = refined_bullets
-                    winner_id = refined_winner_id
+                if refined_summary:
+                    summary = refined_summary
+                if len(refined_bullets) >= len(bullets):
+                    bullets = refined_bullets
+                winner_id = refined_winner_id
 
-            return CompareAdviceResponse(
-                summary=summary or heuristic.summary,
-                bullets=bullets[:4] if bullets else heuristic.bullets,
-                recommended_item_id=winner_id or heuristic.recommended_item_id,
-                source="llm",
-            )
-        logger.warning("compare_advice_fallback: empty llm response")
-    except Exception as exc:
-        logger.warning("compare_advice_llm_fallback: %s", exc)
+        if not _is_valid_compare_output(summary, bullets):
+            logger.warning("compare_advice_%s_invalid_output_after_refine", provider)
+            return None
+
+        clean_bullets = [b for b in bullets if b and not _looks_like_json_artifact(b)][:4]
+        return CompareAdviceResponse(
+            summary=summary,
+            bullets=clean_bullets or heuristic.bullets,
+            recommended_item_id=winner_id or heuristic.recommended_item_id,
+            source="llm",
+            provider=provider,
+        )
+
+    google_key = os.getenv("GOOGLE_API_KEY", "").strip()
+    if google_key:
+        try:
+            model = get_gemini_smalltalk()
+
+            def _gemini_complete(p: str) -> str:
+                resp = model.generate_content([p])
+                return (getattr(resp, "text", None) or "").strip()
+
+            gemini_result = await _attempt_provider("gemini", _gemini_complete)
+            if gemini_result is not None:
+                return gemini_result
+        except Exception as exc:
+            logger.warning("compare_advice_gemini_failed: %s", exc)
+    else:
+        logger.warning("compare_advice_gemini_skipped: GOOGLE_API_KEY missing")
+
+    groq_key = os.getenv("GROQ_API_KEY", "").strip()
+    if groq_key:
+        try:
+            groq_result = await _attempt_provider("groq", groq_compare_completion)
+            if groq_result is not None:
+                return groq_result
+        except Exception as exc:
+            logger.warning("compare_advice_groq_failed: %s", exc)
+    else:
+        logger.warning("compare_advice_groq_skipped: GROQ_API_KEY missing")
 
     return heuristic
 

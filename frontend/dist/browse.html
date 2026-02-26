@@ -259,6 +259,10 @@
         localStorage.setItem(COMPARE_ITEMS_KEY, JSON.stringify(items.slice(0, 3)));
       }
 
+      function productUrl(id) {
+        return `/product.html?id=${encodeURIComponent(id || "")}`;
+      }
+
       function inCompare(item) {
         return state.compareItems.some((x) => x.id === item.id);
       }
@@ -361,6 +365,7 @@
                 <div class="price">$${Number(it.price || 0).toFixed(2)}</div>
                 <div class="desc">${escapeHtml(it.description || "")}</div>
                 <div class="row">
+                  <a class="btn" href="${productUrl(it.id)}" target="_blank" rel="noreferrer">View Product</a>
                   <button class="btn" data-toggle-id="${escapeHtml(it.id || "")}">${compared ? "Remove Compare" : "Add Compare"}</button>
                 </div>
               </div>

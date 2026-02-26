@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mercury Product</title>
+    <style>
+      :root {
+        --bg: #091128;
+        --panel: rgba(18, 26, 56, 0.92);
+        --card: rgba(15, 23, 50, 0.96);
+        --line: rgba(255, 255, 255, 0.11);
+        --text: #eaf4ff;
+        --muted: #a8c3d9;
+        --accent: #19e3ff;
+        --accent2: #19ffd2;
+        --danger: #ff6f91;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background:
+          radial-gradient(940px 440px at 10% -8%, rgba(25, 227, 255, 0.18), transparent 60%),
+          radial-gradient(760px 360px at 88% -10%, rgba(25, 255, 210, 0.11), transparent 60%),
+          linear-gradient(180deg, var(--bg), #060d21);
+      }
+      .wrap {
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 24px 20px 54px;
+      }
+      .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+      .title {
+        margin: 0;
+        font-size: 32px;
+        line-height: 1.1;
+        letter-spacing: 0.2px;
+      }
+      .title span {
+        color: var(--accent);
+        text-shadow: 0 0 16px rgba(25, 227, 255, 0.45);
+      }
+      .sub {
+        color: var(--muted);
+        margin-top: 6px;
+        font-size: 14px;
+      }
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 38px;
+        padding: 0 13px;
+        border: 1px solid rgba(25, 227, 255, 0.5);
+        border-radius: 10px;
+        background: transparent;
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 13px;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .btn.primary {
+        border-color: var(--accent);
+        color: #001018;
+        background: var(--accent);
+      }
+      .btn.warn {
+        border-color: rgba(255, 111, 145, 0.6);
+        color: var(--danger);
+      }
+      .badge {
+        min-width: 22px;
+        height: 22px;
+        padding: 0 7px;
+        border-radius: 999px;
+        background: rgba(25, 227, 255, 0.22);
+        border: 1px solid rgba(25, 227, 255, 0.55);
+        color: #d9f6ff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .panel {
+        margin-top: 16px;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+        padding: 14px;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 16px;
+      }
+      .gallery {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px;
+      }
+      .zoomWrap {
+        position: relative;
+        height: 520px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #0b1225;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        cursor: crosshair;
+      }
+      .zoomWrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        transform-origin: center center;
+        transition: transform 120ms ease-out;
+        will-change: transform, transform-origin;
+      }
+      .zoomHint {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .detail {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px;
+      }
+      .pname {
+        font-size: 29px;
+        font-weight: 900;
+        line-height: 1.15;
+      }
+      .meta {
+        margin-top: 8px;
+        color: #c7dded;
+        font-size: 14px;
+      }
+      .price {
+        margin-top: 10px;
+        color: var(--accent2);
+        font-size: 30px;
+        font-weight: 900;
+      }
+      .desc {
+        margin-top: 12px;
+        color: #bfd4e5;
+        font-size: 14px;
+        line-height: 1.48;
+      }
+      .buyRow {
+        margin-top: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .qtyWrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 3px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgba(10, 18, 42, 0.75);
+      }
+      .qtyWrap button {
+        width: 30px;
+        height: 30px;
+        border: 1px solid rgba(25, 227, 255, 0.45);
+        border-radius: 8px;
+        background: transparent;
+        color: var(--accent);
+        font-weight: 800;
+        cursor: pointer;
+      }
+      .qty {
+        min-width: 28px;
+        text-align: center;
+        font-weight: 800;
+        color: #dff4ff;
+      }
+      .mini {
+        color: var(--muted);
+        font-size: 12.5px;
+      }
+      .status {
+        margin-top: 10px;
+        color: #d2edfc;
+        font-size: 13px;
+        min-height: 20px;
+      }
+      .cartPanel {
+        margin-top: 16px;
+        background: rgba(12, 20, 45, 0.92);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .cartHead {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+      }
+      .cartTitle {
+        font-weight: 900;
+        font-size: 17px;
+      }
+      .cartList {
+        margin-top: 10px;
+        display: grid;
+        gap: 8px;
+      }
+      .cartItem {
+        display: grid;
+        grid-template-columns: 62px 1fr auto;
+        gap: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 8px;
+        background: rgba(8, 14, 32, 0.78);
+      }
+      .cartItem img {
+        width: 62px;
+        height: 62px;
+        object-fit: contain;
+        border-radius: 8px;
+        background: #0a1126;
+      }
+      .cartItemTitle {
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .cartItemMeta {
+        color: var(--muted);
+        font-size: 12px;
+        margin-top: 2px;
+      }
+      .totals {
+        margin-top: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #daf3ff;
+        font-weight: 800;
+      }
+      .empty {
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+        padding: 12px 6px;
+      }
+      .relatedTitle {
+        margin: 0;
+        font-size: 19px;
+        font-weight: 900;
+      }
+      .relatedGrid {
+        margin-top: 12px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 12px;
+      }
+      .relatedCard {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px;
+      }
+      .relatedImg {
+        height: 140px;
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0b1125;
+      }
+      .relatedImg img {
+        max-width: 100%;
+        max-height: 100%;
+      }
+      .relatedName {
+        margin-top: 8px;
+        font-size: 14px;
+        font-weight: 800;
+      }
+      .relatedMeta {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .error {
+        padding: 22px 10px;
+        text-align: center;
+        color: #ffc3cf;
+        font-weight: 700;
+      }
+      @media (max-width: 980px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .zoomWrap {
+          height: 400px;
+        }
+      }
+      @media (max-width: 640px) {
+        .top {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .title {
+          font-size: 27px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="top">
+        <div>
+          <h1 class="title">Mercury <span>Product</span> Detail</h1>
+          <div class="sub">Inspect details, zoom image, and add items to cart.</div>
+        </div>
+        <div class="actions">
+          <a class="btn" href="/">Main App</a>
+          <a class="btn" href="/browse.html">Browse</a>
+          <a class="btn" href="/compare.html">Compare</a>
+          <button class="btn" id="cartToggleBtn">Cart <span class="badge" id="cartCount">0</span></button>
+        </div>
+      </div>
+
+      <div class="panel" id="mainPanel"></div>
+
+      <div class="panel">
+        <h2 class="relatedTitle">You may also like</h2>
+        <div class="relatedGrid" id="relatedGrid"></div>
+      </div>
+    </div>
+
+    <script>
+      const CART_KEY = "mercury_cart_v1";
+      const COMPARE_ITEMS_KEY = "mercury_compare_items_v1";
+
+      const state = {
+        item: null,
+        catalog: [],
+        qty: 1,
+        cart: [],
+        showCart: true,
+      };
+
+      const q = (id) => document.getElementById(id);
+      const money = (n) => `$${Number(n || 0).toFixed(2)}`;
+      const escapeHtml = (value) =>
+        String(value)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#39;");
+
+      function productUrl(id) {
+        return `/product.html?id=${encodeURIComponent(id || "")}`;
+      }
+
+      function loadCart() {
+        try {
+          const raw = localStorage.getItem(CART_KEY);
+          if (!raw) return [];
+          const parsed = JSON.parse(raw);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (_) {
+          return [];
+        }
+      }
+
+      function saveCart() {
+        localStorage.setItem(CART_KEY, JSON.stringify(state.cart));
+      }
+
+      function cartTotals() {
+        const count = state.cart.reduce((acc, it) => acc + Number(it.qty || 0), 0);
+        const total = state.cart.reduce((acc, it) => acc + Number(it.qty || 0) * Number(it.price || 0), 0);
+        return { count, total };
+      }
+
+      function setStatus(msg) {
+        const el = q("statusText");
+        if (el) el.textContent = msg || "";
+      }
+
+      function addCurrentToCompare() {
+        if (!state.item) return;
+        let current = [];
+        try {
+          const raw = localStorage.getItem(COMPARE_ITEMS_KEY);
+          current = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(current)) current = [];
+        } catch (_) {
+          current = [];
+        }
+        const exists = current.some((x) => String(x.id) === String(state.item.id));
+        if (!exists) {
+          if (current.length >= 3) {
+            setStatus("Compare list already has 3 items.");
+            return;
+          }
+          current.push(state.item);
+          localStorage.setItem(COMPARE_ITEMS_KEY, JSON.stringify(current));
+        }
+        setStatus("Added to compare list.");
+      }
+
+      function addCurrentToCart() {
+        if (!state.item) return;
+        const qty = Math.max(1, Number(state.qty || 1));
+        const idx = state.cart.findIndex((x) => String(x.id) === String(state.item.id));
+        if (idx >= 0) {
+          state.cart[idx].qty = Number(state.cart[idx].qty || 0) + qty;
+        } else {
+          state.cart.push({
+            id: state.item.id,
+            title: state.item.title,
+            price: Number(state.item.price || 0),
+            image_path: state.item.image_path,
+            qty,
+          });
+        }
+        saveCart();
+        renderCartPanel();
+        setStatus(`Added ${qty} item(s) to cart.`);
+      }
+
+      function removeFromCart(id) {
+        state.cart = state.cart.filter((it) => String(it.id) !== String(id));
+        saveCart();
+        renderCartPanel();
+      }
+
+      function clearCart() {
+        state.cart = [];
+        saveCart();
+        renderCartPanel();
+      }
+
+      function renderCartPanel() {
+        const totals = cartTotals();
+        q("cartCount").textContent = String(totals.count);
+
+        const host = q("cartPanel");
+        if (!host) return;
+
+        if (!state.showCart) {
+          host.style.display = "none";
+          return;
+        }
+        host.style.display = "";
+
+        if (!state.cart.length) {
+          host.innerHTML = `
+            <div class="cartHead">
+              <div class="cartTitle">Cart</div>
+              <button class="btn warn" id="clearCartBtn" disabled>Clear</button>
+            </div>
+            <div class="empty">Your cart is empty.</div>
+          `;
+          return;
+        }
+
+        host.innerHTML = `
+          <div class="cartHead">
+            <div class="cartTitle">Cart</div>
+            <button class="btn warn" id="clearCartBtn">Clear</button>
+          </div>
+          <div class="cartList">
+            ${state.cart
+              .map(
+                (it) => `
+                  <div class="cartItem">
+                    <img src="/data/${escapeHtml(it.image_path || "")}" alt="${escapeHtml(it.title || "item")}" />
+                    <div>
+                      <div class="cartItemTitle">${escapeHtml(it.title || "Untitled")}</div>
+                      <div class="cartItemMeta">Qty ${Number(it.qty || 0)} • ${money(it.price)}</div>
+                    </div>
+                    <button class="btn warn" data-remove-cart-id="${escapeHtml(it.id || "")}">Remove</button>
+                  </div>
+                `,
+              )
+              .join("")}
+          </div>
+          <div class="totals">
+            <span>Total</span>
+            <span>${money(totals.total)}</span>
+          </div>
+          <div class="buyRow" style="margin-top: 12px;">
+            <button class="btn primary" id="checkoutBtn">Checkout</button>
+          </div>
+        `;
+
+        const clearBtn = q("clearCartBtn");
+        if (clearBtn) clearBtn.addEventListener("click", clearCart);
+        host.querySelectorAll("[data-remove-cart-id]").forEach((btn) => {
+          btn.addEventListener("click", () => removeFromCart(btn.getAttribute("data-remove-cart-id")));
+        });
+        const checkoutBtn = q("checkoutBtn");
+        if (checkoutBtn) {
+          checkoutBtn.addEventListener("click", () => {
+            alert("Checkout flow can be connected to payment APIs. For demo, cart and totals are fully functional.");
+          });
+        }
+      }
+
+      function wireZoom() {
+        const wrap = q("zoomWrap");
+        const img = q("mainImage");
+        if (!wrap || !img) return;
+
+        const onMove = (e) => {
+          const rect = wrap.getBoundingClientRect();
+          const x = ((e.clientX - rect.left) / rect.width) * 100;
+          const y = ((e.clientY - rect.top) / rect.height) * 100;
+          img.style.transformOrigin = `${Math.max(0, Math.min(100, x))}% ${Math.max(0, Math.min(100, y))}%`;
+          img.style.transform = "scale(2.2)";
+        };
+
+        const reset = () => {
+          img.style.transformOrigin = "center center";
+          img.style.transform = "scale(1)";
+        };
+
+        wrap.addEventListener("mousemove", onMove);
+        wrap.addEventListener("mouseenter", onMove);
+        wrap.addEventListener("mouseleave", reset);
+      }
+
+      function renderRelated() {
+        const grid = q("relatedGrid");
+        if (!grid || !state.item) return;
+        const related = state.catalog
+          .filter((it) => String(it.id) !== String(state.item.id))
+          .filter((it) => it.category === state.item.category)
+          .slice(0, 8);
+
+        if (!related.length) {
+          grid.innerHTML = `<div class="empty">No related products available.</div>`;
+          return;
+        }
+
+        grid.innerHTML = related
+          .map(
+            (it) => `
+              <div class="relatedCard">
+                <div class="relatedImg">
+                  <img src="/data/${escapeHtml(it.image_path || "")}" alt="${escapeHtml(it.title || "item")}" />
+                </div>
+                <div class="relatedName">${escapeHtml(it.title || "Untitled item")}</div>
+                <div class="relatedMeta">${escapeHtml(it.color || "n/a")} • ${money(it.price)}</div>
+                <div class="buyRow" style="margin-top:8px;">
+                  <a class="btn" href="${productUrl(it.id)}">View</a>
+                </div>
+              </div>
+            `,
+          )
+          .join("");
+      }
+
+      function renderMain() {
+        const host = q("mainPanel");
+        if (!host) return;
+
+        if (!state.item) {
+          host.innerHTML = `<div class="error">Product not found. Open this page from a catalog card.</div>`;
+          return;
+        }
+
+        host.innerHTML = `
+          <div class="layout">
+            <div class="gallery">
+              <div class="zoomWrap" id="zoomWrap">
+                <img id="mainImage" src="/data/${escapeHtml(state.item.image_path || "")}" alt="${escapeHtml(state.item.title || "product")}" />
+              </div>
+              <div class="zoomHint">Hover on image to zoom</div>
+            </div>
+
+            <div>
+              <div class="detail">
+                <div class="pname">${escapeHtml(state.item.title || "Untitled product")}</div>
+                <div class="meta">${escapeHtml(state.item.category || "n/a")} • ${escapeHtml(state.item.color || "n/a")}</div>
+                <div class="price">${money(state.item.price)}</div>
+                <div class="desc">${escapeHtml(state.item.description || "No description available.")}</div>
+
+                <div class="buyRow">
+                  <div class="qtyWrap">
+                    <button id="qtyMinus">-</button>
+                    <div class="qty" id="qtyValue">${state.qty}</div>
+                    <button id="qtyPlus">+</button>
+                  </div>
+                  <button class="btn primary" id="addCartBtn">Add to Cart</button>
+                  <button class="btn" id="addCompareBtn">Add to Compare</button>
+                </div>
+                <div class="mini">Cart is stored in browser local storage for demo flow.</div>
+                <div class="status" id="statusText"></div>
+              </div>
+
+              <div class="cartPanel" id="cartPanel"></div>
+            </div>
+          </div>
+        `;
+
+        wireZoom();
+        renderCartPanel();
+
+        q("qtyMinus").addEventListener("click", () => {
+          state.qty = Math.max(1, Number(state.qty) - 1);
+          q("qtyValue").textContent = String(state.qty);
+        });
+        q("qtyPlus").addEventListener("click", () => {
+          state.qty = Math.min(20, Number(state.qty) + 1);
+          q("qtyValue").textContent = String(state.qty);
+        });
+        q("addCartBtn").addEventListener("click", addCurrentToCart);
+        q("addCompareBtn").addEventListener("click", addCurrentToCompare);
+      }
+
+      async function init() {
+        state.cart = loadCart();
+        const id = new URLSearchParams(window.location.search).get("id");
+
+        const resp = await fetch("/api/catalog");
+        if (!resp.ok) throw new Error("catalog load failed");
+        const items = await resp.json();
+        state.catalog = Array.isArray(items) ? items : [];
+        state.item = state.catalog.find((it) => String(it.id) === String(id));
+
+        renderMain();
+        renderRelated();
+        renderCartPanel();
+      }
+
+      q("cartToggleBtn").addEventListener("click", () => {
+        state.showCart = !state.showCart;
+        renderCartPanel();
+      });
+
+      init().catch((err) => {
+        q("mainPanel").innerHTML = `<div class="error">${escapeHtml(err.message || "Failed to load product.")}</div>`;
+      });
+    </script>
+  </body>
+</html>

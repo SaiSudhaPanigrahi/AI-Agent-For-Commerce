@@ -5,6 +5,7 @@ import io, json, math, re
 import numpy as np
 from PIL import Image, UnidentifiedImageError
 import requests
+from urllib.parse import urljoin, urlparse
 
 # ---------- Optional deps (graceful fallbacks) ----------
 HAS_TORCH = False
@@ -36,6 +37,12 @@ NEUTRAL_FIRST = True
 COLOR_NAMES = ["black","white","gray","red","orange","yellow","green","blue","purple","pink","brown","assorted"]
 COLOR_ALIASES = {"grey": "gray"}
 COLOR_WORDS = set(COLOR_NAMES) - {"assorted"}
+CATEGORY_ALIASES = {
+    "shoes": ("shoe", "shoes", "sneaker", "sneakers", "trainer", "trainers"),
+    "jackets": ("jacket", "jackets", "coat", "coats", "blazer", "blazers"),
+    "bags": ("bag", "bags", "tote", "totes", "backpack", "backpacks", "handbag", "handbags"),
+    "caps": ("cap", "caps", "hat", "hats", "beanie", "beanies"),
+}
 
 # def _color_from_filename(name: str) -> Optional[str]:
 #     n = re.sub(r"[_\\-/]+", " ", name.lower())
@@ -52,6 +59,17 @@ def _color_from_filename(name: str) -> Optional[str]:
     for c in COLOR_WORDS:
         if re.search(rf"\b{c}\b", n):
             return c
+    return None
+
+
+def _category_from_text(text: Optional[str]) -> Optional[str]:
+    if not text:
+        return None
+    s = re.sub(r"[\\/_-]+", " ", text.lower())
+    for canonical, aliases in CATEGORY_ALIASES.items():
+        for token in aliases:
+            if re.search(rf"\b{re.escape(token)}\b", s):
+                return canonical
     return None
 
 
@@ -126,6 +144,36 @@ def _hsv_hist(img: Image.Image, bins: Tuple[int,int,int]=(12,6,6)) -> np.ndarray
 
 def _hist_intersection(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.minimum(a, b).sum())
+
+
+def _fetch_url_bytes(url: str, timeout: int = 10) -> Optional[Tuple[bytes, str]]:
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0 Safari/537.36",
+        "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+    }
+    resp = requests.get(url, headers=headers, timeout=timeout, allow_redirects=True)
+    resp.raise_for_status()
+    ctype = (resp.headers.get("content-type") or "").lower()
+    return resp.content, ctype
+
+
+def _extract_image_url_from_html(html: str, base_url: str) -> Optional[str]:
+    patterns = [
+        r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']',
+        r'<meta[^>]+name=["\']twitter:image["\'][^>]+content=["\']([^"\']+)["\']',
+        r'<img[^>]+src=["\']([^"\']+)["\']',
+    ]
+    for pat in patterns:
+        m = re.search(pat, html, flags=re.IGNORECASE)
+        if not m:
+            continue
+        candidate = (m.group(1) or "").strip()
+        if not candidate:
+            continue
+        if candidate.startswith("data:"):
+            continue
+        return urljoin(base_url, candidate)
+    return None
 
 # ---------- Embedding backends ----------
 class _OpenClipEncoder:
@@ -334,16 +382,34 @@ class VisionIndex:
 
     def search_image_url(self, url: str, top_k: int = 8) -> List[Dict[str, Any]]:
         try:
-            r = requests.get(url, timeout=8)
-            r.raise_for_status()
-            img = Image.open(io.BytesIO(r.content)).convert("RGB")
+            raw, ctype = _fetch_url_bytes(url, timeout=10)
+            parsed = urlparse(url)
+            filename_hint = Path(parsed.path).name
+
+            if ctype.startswith("image/"):
+                img = Image.open(io.BytesIO(raw)).convert("RGB")
+                return self._search_image(img, filename_hint=filename_hint, top_k=top_k)
+
+            html = raw.decode("utf-8", errors="ignore")
+            image_url = _extract_image_url_from_html(html, url)
+            if not image_url:
+                return []
+            img_raw, _ = _fetch_url_bytes(image_url, timeout=10)
+            img = Image.open(io.BytesIO(img_raw)).convert("RGB")
+            final_hint = Path(urlparse(image_url).path).name or filename_hint
         except Exception:
             return []
-        return self._search_image(img, filename_hint=Path(url).name, top_k=top_k)
+        return self._search_image(img, filename_hint=final_hint, top_k=top_k)
 
     def _search_image(self, img: Image.Image, filename_hint: Optional[str], top_k: int) -> List[Dict[str, Any]]:
+        if len(self.meta) == 0:
+            return []
+
         q_emb, q_hist, q_color = self._embed(img)
         base_scores = self._score(q_emb, q_hist, q_color)
+        hint_text = filename_hint or ""
+        hint_category = _category_from_text(hint_text)
+        hint_color = _color_from_filename(Path(hint_text).stem) if hint_text else None
 
         # Category prior (choose category from visual neighbors)
         cat_boost_map = self._category_prior(base_scores, top_m=40)
@@ -351,7 +417,21 @@ class VisionIndex:
         for i, m in enumerate(self.meta):
             cat_boost[i] = cat_boost_map.get(m["category"], 0.0)
 
-        final = base_scores + cat_boost
+        # Stronger metadata hints for user-provided filenames/URLs.
+        # This helps when visual embedding is noisy (background-heavy images).
+        hint_boost = np.zeros_like(base_scores)
+        if hint_category:
+            for i, m in enumerate(self.meta):
+                if m["category"] == hint_category:
+                    hint_boost[i] += 0.28
+                else:
+                    hint_boost[i] -= 0.07
+        if hint_color:
+            for i, m in enumerate(self.meta):
+                if m["color"] == hint_color:
+                    hint_boost[i] += 0.12
+
+        final = base_scores + cat_boost + hint_boost
 
         order = np.argsort(-final)[:min(top_k*3, len(final))]  # take a bit more, then filter by strict rules
         results: List[Tuple[int, float]] = [(int(j), float(final[int(j)])) for j in order]

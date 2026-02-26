@@ -132,3 +132,4 @@ class CompareAdviceResponse(BaseModel):
     bullets: List[str] = Field(default_factory=list)
     recommended_item_id: Optional[str] = None
     source: Literal["llm", "heuristic"] = "heuristic"
+    provider: Literal["gemini", "groq", "heuristic"] = "heuristic"
